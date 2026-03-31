@@ -1,335 +1,357 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulador Geopolítico: Separatismos Europeus</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
-
-    <style>
-        /* ==========================================================================
-           VARIÁVEIS E RESET
-           ========================================================================== */
-        :root {
-            --bg-dark: #0f172a;
-            --bg-panel: #1e293b;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --accent: #f59e0b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        
-        body {
-            font-family: var(--font-main);
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        /* ==========================================================================
-           UI GLOBAL & CABEÇALHO
-           ========================================================================== */
-        header {
-            background: var(--bg-panel);
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        .brand h1 { font-size: 1.2rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin: 0; }
-        .brand span { color: var(--text-muted); font-size: 0.8rem; }
-        
-        .hud { display: flex; gap: 15px; font-size: 0.9rem; font-weight: bold; }
-        .hud-item { background: var(--bg-dark); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); }
-        .hud-accent { color: var(--accent); }
-
-        main { flex: 1; position: relative; display: flex; flex-direction: column; }
-        
-        .screen {
-            display: none;
-            flex: 1;
-            padding: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-            width: 100%;
-            animation: fadeIn 0.4s ease-out;
-        }
-        .screen.active { display: flex; flex-direction: column; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .btn {
-            background: var(--primary); color: white; border: none; padding: 12px 24px;
-            border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;
-            transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px;
-            margin-top: 15px;
-        }
-        .btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; transform: none; }
-
-        /* ==========================================================================
-           TELA 1: MAPA GEOGUESSR
-           ========================================================================== */
-        .mission-briefing {
-            background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary);
-            padding: 15px; margin-bottom: 20px; border-radius: 0 8px 8px 0;
-        }
-        .mission-briefing h2 { color: var(--primary); font-size: 1.2rem; margin-bottom: 5px; }
-        .mission-briefing p { color: var(--text-main); font-size: 1.1rem; }
-
-        #map-container {
-            width: 100%;
-            height: 450px;
-            min-height: 400px;
-            background-color: #020617;
-            border-radius: 12px; 
-            border: 2px solid var(--border);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            z-index: 1;
-        }
-
-        .leaflet-div-icon { background: transparent; border: none; }
-
-        .radar-pin {
-            position: relative; width: 24px; height: 24px;
-            background: var(--accent); border-radius: 50%;
-            cursor: pointer; border: 3px solid white; 
-            box-shadow: 0 0 15px var(--accent);
-            transition: all 0.2s;
-        }
-        
-        .radar-pin::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            border-radius: 50%; border: 2px solid var(--accent);
-            animation: pulse 1.5s infinite; pointer-events: none;
-        }
-        
-        @keyframes pulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-        
-        .radar-pin:hover { transform: scale(1.2); background: var(--success); }
-        .radar-pin.correct { background: var(--success); box-shadow: 0 0 20px var(--success); border-color: white;}
-        .radar-pin.wrong { background: var(--danger); box-shadow: none; border-color: var(--danger); animation: none;}
-        .radar-pin.wrong::after { display: none; }
-
-        /* ==========================================================================
-           TELA 2: DOSSIÊ & QUIZ
-           ========================================================================== */
-        .dossier-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 768px) { .dossier-layout { grid-template-columns: 3fr 2fr; } }
-
-        .panel { background: var(--bg-panel); padding: 25px; border-radius: 12px; border: 1px solid var(--border); }
-        .panel h3 { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; }
-        
-        .info-group { margin-bottom: 15px; }
-        .info-group label { display: block; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 4px; }
-        .info-group p { color: var(--text-main); font-size: 1.05rem; line-height: 1.5; }
-
-        .notebook-task {
-            background: #fefce8; color: #854d0e; padding: 15px; border-radius: 8px;
-            border-left: 4px solid #facc15; margin-top: 20px; font-family: monospace; font-size: 1rem;
-        }
-
-        .quiz-container { margin-top: 20px; }
-        .quiz-question { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; }
-        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
-        .quiz-option {
-            background: var(--bg-dark); border: 1px solid var(--border); padding: 12px 15px;
-            border-radius: 8px; cursor: pointer; transition: background 0.2s; color: var(--text-main);
-        }
-        .quiz-option:hover { background: #334155; }
-        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--success); color: var(--success); }
-        .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
-
-        /* ==========================================================================
-           TELA 3: BOSS FINAL
-           ========================================================================== */
-        .matching-grid { display: flex; justify-content: space-between; gap: 20px; margin-top: 20px; }
-        .match-col { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        .match-col h4 { text-align: center; color: var(--text-muted); margin-bottom: 10px; }
-        
-        .match-item {
-            background: var(--bg-panel); border: 2px solid var(--border); padding: 15px;
-            border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; transition: all 0.2s;
-        }
-        .match-item.selected { border-color: var(--primary); background: rgba(59, 130, 246, 0.2); }
-        .match-item.matched { border-color: var(--success); background: rgba(16, 185, 129, 0.1); cursor: default; opacity: 0.7; }
-        .match-item.error { border-color: var(--danger); animation: shake 0.4s; }
-
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-
-    </style>
-</head>
-<body>
-
-    <header>
-        <div class="brand">
-            <h1>Geopolítica 360</h1>
-            <span>Aula Interativa</span>
-        </div>
-        <div class="hud">
-            <div class="hud-item">Nível: <span id="hud-level" class="hud-accent">1/5</span></div>
-            <div class="hud-item">Precisão: <span id="hud-score" class="hud-accent">100%</span></div>
-        </div>
-    </header>
-
-    <main>
-        <div id="screen-intro" class="screen active" style="align-items: center; justify-content: center; text-align: center;">
-            <h1 style="font-size: 2.5rem; color: var(--primary); margin-bottom: 15px;">Missão: Europa Fragmentada</h1>
-            <p style="font-size: 1.2rem; max-width: 600px; color: var(--text-muted); margin-bottom: 30px; line-height: 1.6;">
-                Você foi designado para mapear os principais focos de tensão separatista no continente europeu. 
-                Sua missão envolve localizar os movimentos, analisar os dossiês de inteligência e registrar os dados críticos no seu caderno.
-            </p>
-            <button class="btn" onclick="startGame()">Iniciar Simulação</button>
-        </div>
-
-        <div id="screen-map" class="screen">
-            <div class="mission-briefing">
-                <h2>Alvo de Reconhecimento:</h2>
-                <p id="map-prompt">Localize a base no mapa.</p>
-            </div>
-            
-            <div id="map-container"></div>
-            <p id="map-feedback" style="margin-top: 15px; text-align: center; font-weight: bold; height: 24px;"></p>
-        </div>
-
-        <div id="screen-dossier" class="screen">
-            <div class="dossier-layout">
-                <div class="panel">
-                    <h3 id="dossier-title">Dossiê</h3>
-                    <div class="info-group"><label>País Soberano Atual</label><p id="dossier-country"></p></div>
-                    <div class="info-group"><label>Idioma / Identidade</label><p id="dossier-culture"></p></div>
-                    <div class="info-group"><label>Histórico e Motivação</label><p id="dossier-history"></p></div>
-                    <div class="notebook-task">
-                        <strong>✍️ Missão no Caderno:</strong><br><span id="dossier-task"></span>
-                    </div>
-                </div>
-                <div class="panel">
-                    <h3>Validação de Inteligência</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Responda corretamente para provar que processou as informações.</p>
-                    <div class="quiz-container">
-                        <div class="quiz-question" id="quiz-question"></div>
-                        <div class="quiz-options" id="quiz-options"></div>
-                    </div>
-                    <div style="margin-top: 30px; text-align: right;">
-                        <button class="btn" id="btn-next-mission" disabled onclick="nextPhase()">Próxima Missão</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="screen-boss" class="screen">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <h2 style="color: var(--primary);">Desafio Final: Síntese Geopolítica</h2>
-                <p style="color: var(--text-muted);">Relacione o Movimento Separatista ao seu País correspondente para finalizar a aula.</p>
-            </div>
-            <div class="matching-grid" id="matching-grid"></div>
-        </div>
-
-        <div id="screen-victory" class="screen" style="align-items: center; justify-content: center; text-align: center;">
-            <h1 style="font-size: 3rem; color: var(--success); margin-bottom: 15px;">Missão Cumprida!</h1>
-            <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin-bottom: 30px;">
-                Você mapeou as tensões da Europa com uma precisão de <span id="final-score" class="hud-accent">100%</span>.
-            </p>
-            <button class="btn" onclick="location.reload()">Reiniciar Aula</button>
-        </div>
-    </main>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
     <script>
-        const gameData = [
+        /* ==========================================================================
+           BANCO DE DADOS MASTER: 31 MOVIMENTOS
+           ========================================================================== */
+        const masterGameData = [
             {
-                id: 'catalunha', region: 'Catalunha', country: 'Espanha',
-                lat: 41.8781, lng: 1.5,
-                culture: 'Língua e cultura catalãs. Possuem instituições próprias históricas.',
-                history: 'Uma das regiões mais ricas e industrializadas da Espanha. A principal motivação atual é econômica e fiscal. Em 2017, realizaram um Referendo de Independência considerado ilegal por Madri, resultando na prisão ou fuga de seus líderes e forte tensão política.',
-                task: 'Resuma no caderno: Qual foi a motivação principal da Catalunha para o referendo de 2017 e qual foi a reação do governo espanhol?',
-                quiz: {
-                    q: 'O que culminou na grande crise política da Catalunha em 2017?',
-                    options: [
-                        { text: 'Um conflito armado iniciado por um grupo terrorista.', isCorrect: false },
-                        { text: 'A realização de um referendo unilateral de independência.', isCorrect: true },
-                        { text: 'A invasão do território por forças francesas.', isCorrect: false }
-                    ]
-                }
+                id: 'baviera', region: 'Baviera', country: 'Alemanha', lat: 48.79, lng: 11.49,
+                culture: 'Cultura bávara forte, dialeto próprio e tradições locais conservadoras.',
+                history: 'Movimento eleitoral minoritário. O objetivo é a independência, motivada pela ideia de que a rica Baviera sustenta o resto da Alemanha financeiramente.',
+                task: 'Anote no caderno: Qual é o principal argumento do movimento separatista na Baviera?',
+                quiz: { q: 'A situação atual do separatismo na Baviera é caracterizada por:', options: [
+                    { text: 'Conflito armado e insurgência.', isCorrect: false },
+                    { text: 'Movimento político pacífico e eleitoralmente minoritário.', isCorrect: true },
+                    { text: 'Controle total da região através de um estado de facto.', isCorrect: false }
+                ]}
             },
             {
-                id: 'escocia', region: 'Escócia', country: 'Reino Unido',
-                lat: 56.4907, lng: -4.2026,
-                culture: 'Identidade Celta; Língua inglesa e gaélico escocês.',
-                history: 'Mantém forte autonomia. Em 2014, realizaram um referendo oficial e a maioria votou por permanecer no Reino Unido. No entanto, o Brexit reacendeu o desejo separatista, pois a maioria dos escoceses desejava continuar na União Europeia.',
-                task: 'Anote no caderno: Qual evento político recente reacendeu o desejo de independência da Escócia?',
-                quiz: {
-                    q: 'Por que o nacionalismo escocês ganhou força novamente após 2016?',
-                    options: [
-                        { text: 'Devido à insatisfação com a saída do Reino Unido da União Europeia (Brexit).', isCorrect: true },
-                        { text: 'Porque a Inglaterra tentou proibir o idioma escocês.', isCorrect: false },
-                        { text: 'Pela descoberta de novas minas de ouro na região.', isCorrect: false }
-                    ]
-                }
+                id: 'artsakh', region: 'Nagorno-Karabakh', country: 'Azerbaijão', lat: 39.8, lng: 46.7,
+                culture: 'Etnia e cultura armênia, religião cristã ortodoxa.',
+                history: 'Território de maioria armênia que declarou independência do Azerbaijão. Operou como um estado de facto (República de Artsakh) até ser totalmente retomado militarmente pelo Azerbaijão em 2023. O movimento agora atua no exílio.',
+                task: 'Anote no caderno: Qual foi o desfecho do conflito em Nagorno-Karabakh no ano de 2023?',
+                quiz: { q: 'Onde atua atualmente o movimento separatista de Nagorno-Karabakh?', options: [
+                    { text: 'No governo central do Azerbaijão.', isCorrect: false },
+                    { text: 'No exílio e na diáspora armênia, após a retomada do território.', isCorrect: true },
+                    { text: 'Em bases militares dentro do próprio enclave.', isCorrect: false }
+                ]}
             },
             {
-                id: 'paisbasco', region: 'País Basco', country: 'Espanha',
-                lat: 43.0, lng: -2.5,
-                culture: 'Língua Euskara (idioma isolado, sem parentesco na Europa).',
-                history: 'Sofreu severa repressão cultural durante a ditadura de Francisco Franco. Isso gerou o surgimento do ETA, grupo que lutou pela independência através de atentados por décadas. Hoje, o ETA foi dissolvido e o movimento atua pacificamente.',
-                task: 'Pesquise e anote: O que foi o ETA e como o separatismo basco atua nos dias de hoje?',
-                quiz: {
-                    q: 'Qual é a situação atual do movimento separatista no País Basco?',
-                    options: [
-                        { text: 'O conflito armado continua sendo a principal forma de atuação.', isCorrect: false },
-                        { text: 'A região conquistou independência total da Espanha em 2011.', isCorrect: false },
-                        { text: 'O grupo armado ETA foi dissolvido e a busca por autonomia ocorre pela via política.', isCorrect: true }
-                    ]
-                }
+                id: 'flandres', region: 'Flandres', country: 'Bélgica', lat: 51.0, lng: 4.3,
+                culture: 'Língua holandesa (flamengo) e forte identidade regional.',
+                history: 'A região norte, mais rica da Bélgica. O nacionalismo flamengo possui forte representação política, buscando independência ou até união com os Países Baixos por discordâncias econômicas com o sul francófono.',
+                task: 'Anote no caderno: Por que a região de Flandres busca a separação da Bélgica?',
+                quiz: { q: 'Além da independência, qual outra alternativa é considerada pelo nacionalismo flamengo?', options: [
+                    { text: 'União com a Alemanha.', isCorrect: false },
+                    { text: 'União com os Países Baixos (Holanda).', isCorrect: true },
+                    { text: 'Retorno ao Império Francês.', isCorrect: false }
+                ]}
             },
             {
-                id: 'irlandanorte', region: 'Irlanda do Norte', country: 'Reino Unido',
-                lat: 54.6, lng: -6.8,
-                culture: 'Divisão profunda: Protestantes (leais ao Reino Unido) vs Católicos (Nacionalistas irlandeses).',
-                history: 'Palco de um conflito violento conhecido como "The Troubles". Os nacionalistas católicos queriam se separar do Reino Unido e se unir à República da Irlanda. O Acordo de Sexta-Feira Santa (1998) trouxe paz à região.',
-                task: 'Anote no caderno: Qual era o principal objetivo dos nacionalistas católicos na Irlanda do Norte?',
-                quiz: {
-                    q: 'Diferente de outros movimentos, o que os nacionalistas da Irlanda do Norte buscavam?',
-                    options: [
-                        { text: 'Criar um país totalmente novo e isolado.', isCorrect: false },
-                        { text: 'Separar-se do Reino Unido para se reunificar com a República da Irlanda.', isCorrect: true },
-                        { text: 'Criar um estado governado inteiramente por líderes católicos.', isCorrect: false }
-                    ]
-                }
+                id: 'valonia', region: 'Valônia', country: 'Bélgica', lat: 50.3, lng: 5.0,
+                culture: 'Língua francesa e cultura francófona.',
+                history: 'Região sul da Bélgica. Possui um movimento minoritário (Rattachismo) que, em caso de fragmentação do país, prefere a união e anexação territorial à França.',
+                task: 'Anote no caderno: O que significa o movimento Rattachista na Valônia?',
+                quiz: { q: 'Qual é o objetivo final do Rattachismo na Valônia?', options: [
+                    { text: 'A união da região com a França.', isCorrect: true },
+                    { text: 'A independência total como um novo país.', isCorrect: false },
+                    { text: 'A união com a Alemanha.', isCorrect: false }
+                ]}
             },
             {
-                id: 'kosovo', region: 'Kosovo', country: 'Sérvia',
-                lat: 42.6026, lng: 20.9029,
-                culture: 'Maioria de etnia Albanesa (muçulmanos), dentro de território histórico Sérvio (cristãos ortodoxos).',
-                history: 'Após a desintegração da Iugoslávia nos anos 90, o Kosovo sofreu brutal repressão da Sérvia, gerando intervenção da OTAN. Em 2008, Kosovo declarou independência. É reconhecido por cerca de 100 países, mas a Sérvia ainda o considera uma província rebelde.',
-                task: 'Anote no caderno: Qual é o status diplomático do Kosovo hoje?',
-                quiz: {
-                    q: 'Qual é o principal obstáculo geopolítico do Kosovo hoje?',
-                    options: [
-                        { text: 'Não possui governo próprio constituído.', isCorrect: false },
-                        { text: 'Declarou independência, mas não possui reconhecimento internacional unânime (a Sérvia o reivindica).', isCorrect: true },
-                        { text: 'A população votou para retornar voluntariamente ao domínio da Iugoslávia.', isCorrect: false }
-                    ]
-                }
+                id: 'rsrpska', region: 'Republika Srpska', country: 'Bósnia e Herzegovina', lat: 44.7, lng: 17.1,
+                culture: 'Etnia sérvia, religião cristã ortodoxa.',
+                history: 'Uma das entidades da Bósnia, criada após a guerra dos anos 90. Gera forte tensão política interna com ameaças frequentes de secessão de suas lideranças para se unirem à Sérvia.',
+                task: 'Anote no caderno: Qual país vizinho a Republika Srpska deseja se unir?',
+                quiz: { q: 'A Republika Srpska ameaça a estabilidade de qual região europeia?', options: [
+                    { text: 'Península Ibérica.', isCorrect: false },
+                    { text: 'Escandinávia.', isCorrect: false },
+                    { text: 'Os Bálcãs.', isCorrect: true }
+                ]}
+            },
+            {
+                id: 'chiprenorte', region: 'Chipre do Norte', country: 'Chipre', lat: 35.2, lng: 33.5,
+                culture: 'Etnia e língua turca, religião islâmica.',
+                history: 'Após conflitos étnicos em 1974, a Turquia ocupou o norte da ilha. O local declarou independência como "República Turca de Chipre do Norte", operando como estado de facto, mas reconhecido mundialmente apenas pela Turquia.',
+                task: 'Anote no caderno: Qual é o único país do mundo que reconhece o Chipre do Norte?',
+                quiz: { q: 'O status do Chipre do Norte perante a ONU é:', options: [
+                    { text: 'Reconhecido como Estado-Membro.', isCorrect: false },
+                    { text: 'Um estado de facto, não reconhecido pela comunidade internacional (exceto Turquia).', isCorrect: true },
+                    { text: 'Uma província ultramarina da Grécia.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'faroe', region: 'Ilhas Faroe', country: 'Dinamarca', lat: 62.0, lng: -6.7,
+                culture: 'Idioma feroês, descendentes de nórdicos.',
+                history: 'Arquipélago no Atlântico com ampla autonomia. Possui forte debate político interno onde parte da população defende a soberania e independência total da Coroa Dinamarquesa.',
+                task: 'Anote no caderno: Qual o nível atual de controle da Dinamarca sobre as Ilhas Faroe?',
+                quiz: { q: 'As Ilhas Faroe buscam:', options: [
+                    { text: 'Independência total da Dinamarca.', isCorrect: true },
+                    { text: 'Anexação pela Islândia.', isCorrect: false },
+                    { text: 'Retorno ao controle da União Europeia.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'catalunha', region: 'Catalunha', country: 'Espanha', lat: 41.8, lng: 1.5,
+                culture: 'Língua catalã e instituições históricas próprias.',
+                history: 'Movimento politicamente consolidado buscando uma República Catalã. O referendo de independência de 2017 causou uma das maiores crises institucionais da Espanha, gerando prisões e fugas de líderes.',
+                task: 'Anote no caderno: O que ocorreu em 2017 que agravou a crise na Catalunha?',
+                quiz: { q: 'O movimento catalão atualmente é:', options: [
+                    { text: 'Pacífico e busca a secessão institucional.', isCorrect: true },
+                    { text: 'Armado e atua através de guerrilhas.', isCorrect: false },
+                    { text: 'Minoritário e sem representação no governo local.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'paisbasco', region: 'País Basco', country: 'Espanha', lat: 43.0, lng: -2.5,
+                culture: 'Língua Euskara (sem parentesco com outras línguas europeias).',
+                history: 'Historicamente buscou independência via conflito armado com o grupo terrorista ETA. Hoje, com o fim do grupo, o nacionalismo atua exclusivamente na via política institucional buscando independência ou autonomia máxima.',
+                task: 'Anote no caderno: Como o separatismo basco atua hoje após o fim do ETA?',
+                quiz: { q: 'O antigo grupo ETA utilizava qual método em sua busca por independência?', options: [
+                    { text: 'Petições online e campanhas em redes sociais.', isCorrect: false },
+                    { text: 'Luta armada e atentados terroristas.', isCorrect: true },
+                    { text: 'Embargos econômicos e bloqueios navais.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'galiza', region: 'Galiza', country: 'Espanha', lat: 42.8, lng: -7.8,
+                culture: 'Língua galega e forte herança celta.',
+                history: 'Nacionalismo focado na preservação da herança linguística e cultural. Busca maior autonomia de Madri e, para algumas facções, a independência total.',
+                task: 'Anote no caderno: A identidade galega é focada em qual herança histórica?',
+                quiz: { q: 'O nacionalismo galego é principalmente motivado por:', options: [
+                    { text: 'Questões linguísticas e herança cultural celta.', isCorrect: true },
+                    { text: 'Descoberta de vastas reservas de petróleo.', isCorrect: false },
+                    { text: 'Conflitos religiosos recentes.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'andaluzia', region: 'Andaluzia, Canárias e Valência', country: 'Espanha', lat: 37.3, lng: -4.5,
+                culture: 'Culturas regionais diversas com variações linguísticas.',
+                history: 'Ao contrário da Catalunha, possuem movimentos nacionalistas e independentistas de menor escala, focados principalmente em garantir maior autonomia política e proteção regional.',
+                task: 'Anote no caderno: Como a força desses movimentos se compara ao da Catalunha?',
+                quiz: { q: 'Os movimentos na Andaluzia e Canárias são considerados:', options: [
+                    { text: 'A principal ameaça à unidade espanhola.', isCorrect: false },
+                    { text: 'Movimentos de menor escala e menor impacto imediato.', isCorrect: true },
+                    { text: 'Grupos armados ativos.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'corsega', region: 'Córsega', country: 'França', lat: 42.1, lng: 9.0,
+                culture: 'Idioma corso e forte identidade insular.',
+                history: 'O nacionalismo é a força política dominante na ilha. Após décadas de atuação de grupos clandestinos, hoje o foco é exigir de Paris ampla autonomia fiscal e reconhecimento do povo corso, ou independência.',
+                task: 'Anote no caderno: Qual é a atual via de atuação do separatismo corso?',
+                quiz: { q: 'Além da independência, qual é uma demanda central da Córsega para a França?', options: [
+                    { text: 'Ampla autonomia fiscal e reconhecimento cultural.', isCorrect: true },
+                    { text: 'União imediata com a Itália.', isCorrect: false },
+                    { text: 'Tornar-se a nova capital francesa.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'bretanha', region: 'Bretanha', country: 'França', lat: 48.2, lng: -2.9,
+                culture: 'Herança celta e língua bretã.',
+                history: 'Movimento ativo em oposição à centralização de Paris, focado na defesa do autogoverno regional e na preservação da sua cultura milenar e idioma celta.',
+                task: 'Anote no caderno: Qual herança cultural motiva o nacionalismo bretão?',
+                quiz: { q: 'O movimento na Bretanha opõe-se principalmente:', options: [
+                    { text: 'À política centralizadora do governo francês (Paris).', isCorrect: true },
+                    { text: 'À união com a Alemanha.', isCorrect: false },
+                    { text: 'Ao livre comércio no Oceano Atlântico.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'occitania', region: 'Occitânia e Alsácia', country: 'França', lat: 43.6, lng: 1.4,
+                culture: 'Línguas regionais (occitano e alsaciano).',
+                history: 'Possuem foco forte na proteção linguística. O separatismo radical é minoritário, com a maioria da população e dos políticos buscando apenas preservar sua autonomia administrativa dentro da França.',
+                task: 'Anote no caderno: Qual é o foco principal dos movimentos na Occitânia e Alsácia?',
+                quiz: { q: 'O status do separatismo nessas regiões é:', options: [
+                    { text: 'Maioritário e a beira da secessão.', isCorrect: false },
+                    { text: 'Um movimento minoritário, focado mais em autonomia e língua.', isCorrect: true },
+                    { text: 'Um estado de facto não reconhecido.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'abecasia', region: 'Abecásia', country: 'Geórgia', lat: 43.0, lng: 41.0,
+                culture: 'Etnia abecásia, fortes laços com a Rússia.',
+                history: 'Declarou independência após guerra nos anos 90. Funciona como um estado de facto, com governo próprio, mas é apoiado e reconhecido internacionalmente quase que exclusivamente pela Rússia.',
+                task: 'Anote no caderno: Qual grande potência sustenta a independência da Abecásia?',
+                quiz: { q: 'A Geórgia considera a Abecásia como:', options: [
+                    { text: 'Um território legalmente soberano.', isCorrect: false },
+                    { text: 'Uma província da Turquia.', isCorrect: false },
+                    { text: 'Um território georgiano ocupado pela Rússia.', isCorrect: true }
+                ]}
+            },
+            {
+                id: 'ossetiasul', region: 'Ossétia do Sul', country: 'Geórgia', lat: 42.2, lng: 43.9,
+                culture: 'Etnia osseta.',
+                history: 'Separou-se da Geórgia de forma sangrenta. É um estado de facto, mas diferente da Abecásia, grande parte da sua liderança defende a independência apenas como um passo para a união definitiva com a Rússia.',
+                task: 'Anote no caderno: Qual é o objetivo de longo prazo de muitos líderes da Ossétia do Sul?',
+                quiz: { q: 'Qual foi o evento marcante recente envolvendo a Ossétia do Sul?', options: [
+                    { text: 'A Guerra Russo-Georgiana de 2008.', isCorrect: true },
+                    { text: 'A Segunda Guerra Mundial.', isCorrect: false },
+                    { text: 'A divisão pacífica via referendo da ONU.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'tirolsul', region: 'Tirol do Sul (Alto Ádige)', country: 'Itália', lat: 46.4, lng: 11.3,
+                culture: 'Maioria germanófona (falantes de alemão).',
+                history: 'Região rica que foi anexada pela Itália. Possui alto grau de autonomia, mas movimentos defendem a secessão para retorno ao estado austríaco do Tirol, ou a independência total.',
+                task: 'Anote no caderno: Por que o idioma principal dessa região italiana não é o italiano?',
+                quiz: { q: 'A secessão do Tirol do Sul tem como alternativa à independência:', options: [
+                    { text: 'A integração territorial à Áustria.', isCorrect: true },
+                    { text: 'A criação de um estado suíço.', isCorrect: false },
+                    { text: 'A unificação com o sul da França.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'sardenha', region: 'Sardenha e Sicília', country: 'Itália', lat: 40.1, lng: 9.0,
+                culture: 'Identidade insular forte, idiomas próprios e legado histórico milenar.',
+                history: 'Ambas as ilhas possuem movimentos nacionalistas. O apelo pelo autogoverno e independência tem raízes históricas profundas, sendo mais organizado politicamente na Sardenha.',
+                task: 'Anote no caderno: Qual o caráter principal do separatismo nas grandes ilhas italianas?',
+                quiz: { q: 'Os movimentos nestas ilhas fundamentam-se em:', options: [
+                    { text: 'Disputas puramente religiosas.', isCorrect: false },
+                    { text: 'Raízes históricas e identidade cultural distinta do continente.', isCorrect: true },
+                    { text: 'Pressão militar de países do norte da África.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'veneto', region: 'Vêneto e Lombardia', country: 'Itália', lat: 45.4, lng: 11.8,
+                culture: 'Identidade regional do norte industrializado.',
+                history: 'Historicamente ligados ao projeto separatista da "Padânia". Hoje, esses movimentos focam em regionalismo e na busca por autonomia fiscal máxima para não dividir a riqueza gerada com o sul da Itália.',
+                task: 'Anote no caderno: Qual foi o antigo nome do projeto de independência do norte da Itália?',
+                quiz: { q: 'A principal motivação do regionalismo no Vêneto e Lombardia é:', options: [
+                    { text: 'Econômica (retenção de impostos).', isCorrect: true },
+                    { text: 'Religiosa (separação do Vaticano).', isCorrect: false },
+                    { text: 'Étnica (origens eslavas).', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'transnistria', region: 'Transnístria', country: 'Moldávia', lat: 46.8, lng: 29.6,
+                culture: 'Forte herança soviética, falantes de russo e ucraniano.',
+                history: 'Um "estado fantasma" pró-Rússia preso no tempo desde o colapso soviético. De facto independente desde 1992 com tropas russas no território, mas sem nenhum reconhecimento internacional oficial.',
+                task: 'Anote no caderno: Por que a Transnístria é chamada de "estado fantasma"?',
+                quiz: { q: 'A sobrevivência da Transnístria depende do apoio logístico e militar de qual país?', options: [
+                    { text: 'Romênia.', isCorrect: false },
+                    { text: 'Rússia.', isCorrect: true },
+                    { text: 'Turquia.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'gagauzia', region: 'Gagaúzia', country: 'Moldávia', lat: 46.3, lng: 28.6,
+                culture: 'Povo de origem turcomana, cristãos ortodoxos e falantes de russo.',
+                history: 'Região autônoma na Moldávia com forte sentimento pró-Rússia e constantes tensões políticas com o governo central moldavo, ameaçando o separatismo caso o país se alinhe à Romênia ou à UE.',
+                task: 'Anote no caderno: O que poderia engatilhar o separatismo total da Gagaúzia?',
+                quiz: { q: 'A Gagaúzia possui forte alinhamento político com:', options: [
+                    { text: 'A União Europeia.', isCorrect: false },
+                    { text: 'A Rússia.', isCorrect: true },
+                    { text: 'Os Estados Unidos.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'escocia', region: 'Escócia', country: 'Reino Unido', lat: 56.4, lng: -4.2,
+                culture: 'Identidade celta, instituições próprias e forte orgulho nacional.',
+                history: 'Movimento dominante politicamente liderado pelo SNP. Perdeu o referendo de 2014, mas a luta pela independência ganhou novo fôlego após a saída do Reino Unido da União Europeia (Brexit).',
+                task: 'Anote no caderno: Qual partido político lidera o movimento separatista escocês?',
+                quiz: { q: 'Por que a Escócia considera um novo referendo de independência?', options: [
+                    { text: 'Devido aos efeitos do Brexit.', isCorrect: true },
+                    { text: 'Porque a Inglaterra declarou guerra à Escócia.', isCorrect: false },
+                    { text: 'Por causa da descoberta de novas ilhas.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'irlandanorte', region: 'Irlanda do Norte', country: 'Reino Unido', lat: 54.6, lng: -6.8,
+                culture: 'Divisão identitária profunda entre irlandeses e britânicos.',
+                history: 'Após décadas de violência extrema, os movimentos republicanos/nacionalistas (como o Sinn Féin) continuam ativos via política, buscando não um novo país, mas a secessão para a reunificação com a Irlanda.',
+                task: 'Anote no caderno: O movimento republicano na Irlanda do Norte busca criar um novo país independente?',
+                quiz: { q: 'Qual é o objetivo final dos nacionalistas na Irlanda do Norte?', options: [
+                    { text: 'Ser a capital do Reino Unido.', isCorrect: false },
+                    { text: 'Secessão e reunificação com a República da Irlanda.', isCorrect: true },
+                    { text: 'Abolir a monarquia na Europa.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'paisdegales', region: 'País de Gales', country: 'Reino Unido', lat: 52.3, lng: -3.7,
+                culture: 'Identidade celta antiga e língua galesa revitalizada.',
+                history: 'Historicamente mais integrado à Inglaterra que a Escócia, o nacionalismo galês (liderado pelo partido Plaid Cymru) e a demanda por independência têm apresentado crescimento político nos últimos anos.',
+                task: 'Anote no caderno: Qual é o nome do principal partido nacionalista do País de Gales?',
+                quiz: { q: 'O movimento de independência galesa pode ser descrito como:', options: [
+                    { text: 'Uma insurgência armada crescente.', isCorrect: false },
+                    { text: 'Um movimento político em crescimento (Plaid Cymru).', isCorrect: true },
+                    { text: 'Um projeto já consolidado e finalizado.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'cornualha', region: 'Cornualha', country: 'Reino Unido', lat: 50.4, lng: -4.6,
+                culture: 'Herança celta britônica.',
+                history: 'Um movimento minoritário focado em proteger sua identidade histórica e idioma próprio. Buscam maior autonomia em relação à Inglaterra e reconhecimento formal como uma das nações celtas.',
+                task: 'Anote no caderno: O separatismo na Cornualha é considerado um movimento de massa ou minoritário?',
+                quiz: { q: 'O principal foco do movimento na Cornualha é:', options: [
+                    { text: 'Criar uma nova moeda e romper com a Inglaterra financeiramente.', isCorrect: false },
+                    { text: 'Autonomia, identidade histórica e reconhecimento como nação celta.', isCorrect: true },
+                    { text: 'Anexação imediata pela França.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'chechenia', region: 'Chechênia', country: 'Rússia', lat: 43.3, lng: 45.6,
+                culture: 'Etnia chechena e religião islâmica.',
+                history: 'A "República Chechena da Ichkeria" travou duas guerras brutais contra Moscou nos anos 90 e 2000. Hoje, a região é duramente controlada pela Rússia e o movimento independentista original atua quase exclusivamente no exílio.',
+                task: 'Anote no caderno: Como a Rússia lidou com o desejo de independência da Chechênia?',
+                quiz: { q: 'Onde atua a maior parte do movimento separatista checheno da Ichkeria atualmente?', options: [
+                    { text: 'No parlamento de Moscou.', isCorrect: false },
+                    { text: 'De forma livre nas praças da capital chechena.', isCorrect: false },
+                    { text: 'Reprimido, operando majoritariamente no exílio.', isCorrect: true }
+                ]}
+            },
+            {
+                id: 'circassia', region: 'Circássia', country: 'Rússia', lat: 43.9, lng: 41.8,
+                culture: 'Povos circassianos (Adyge), espalhados pelo Cáucaso e diáspora.',
+                history: 'Movimento etno-cultural focado no resgate de suas terras históricas e no reconhecimento do genocídio do século XIX. Facções defendem a unificação de repúblicas russas para formar um Estado Independente.',
+                task: 'Anote no caderno: Além da independência territorial, o que o nacionalismo circassiano busca que a Rússia reconheça?',
+                quiz: { q: 'O movimento circassiano tem suas raízes em:', options: [
+                    { text: 'Questões econômicas ligadas ao petróleo.', isCorrect: false },
+                    { text: 'Traumas históricos e o resgate de terras após o genocídio do séc. XIX.', isCorrect: true },
+                    { text: 'Conflitos com a União Europeia.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'daguestao', region: 'Daguestão e Inguchétia', country: 'Rússia', lat: 42.9, lng: 46.9,
+                culture: 'Dezenas de etnias distintas e religião islâmica forte.',
+                history: 'Abrigo histórico do chamado "Emirado do Cáucaso". O separatismo nestas áreas costuma se manifestar através de uma insurgência islâmica clandestina e descentralizada, atualmente de baixíssima intensidade após dura repressão.',
+                task: 'Anote no caderno: Qual foi a roupagem que o separatismo assumiu recentemente nessas repúblicas?',
+                quiz: { q: 'O separatismo moderno no Daguestão e Inguchétia foi marcado por:', options: [
+                    { text: 'Uma insurgência armada islâmica descentralizada.', isCorrect: true },
+                    { text: 'Petições pacíficas levadas a Moscou.', isCorrect: false },
+                    { text: 'Luta para adoção da língua russa como idioma único.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'kosovo', region: 'Kosovo', country: 'Sérvia', lat: 42.6, lng: 20.9,
+                culture: 'Maioria étnica albanesa em território considerado sagrado para os sérvios.',
+                history: 'Após guerra e intervenção militar externa, declarou independência unilateralmente em 2008. Funciona como estado de facto, com reconhecimento internacional parcial (Sérvia e aliados se recusam a reconhecer).',
+                task: 'Anote no caderno: Qual o nível de reconhecimento diplomático do Kosovo hoje?',
+                quiz: { q: 'A soberania do Kosovo é:', options: [
+                    { text: 'Reconhecida universalmente pela ONU e pela Sérvia.', isCorrect: false },
+                    { text: 'Inexistente, sendo governado diretamente pela capital da Sérvia.', isCorrect: false },
+                    { text: 'Contestada; atua como independente, mas possui reconhecimento internacional parcial.', isCorrect: true }
+                ]}
+            },
+            {
+                id: 'donbass', region: 'Donetsk e Luhansk', country: 'Ucrânia', lat: 48.0, lng: 37.8,
+                culture: 'População fortemente falante de russo e com ligações culturais a Moscou.',
+                history: 'Epicentro do conflito e separatismo pró-Rússia iniciado em 2014. Foram reconhecidas como independentes pela Rússia pouco antes da invasão total da Ucrânia, sendo atualmente ocupadas e "anexadas" militarmente por Moscou.',
+                task: 'Anote no caderno: Qual país patrocinou e posteriormente anexou o território dessas repúblicas separatistas?',
+                quiz: { q: 'A atual situação de Donetsk e Luhansk é:', options: [
+                    { text: 'Regiões pacíficas reintegradas à Ucrânia.', isCorrect: false },
+                    { text: 'Ocupadas militarmente e anexadas ilegalmente pela Rússia.', isCorrect: true },
+                    { text: 'Estados soberanos membros da União Europeia.', isCorrect: false }
+                ]}
+            },
+            {
+                id: 'crimeia', region: 'Crimeia', country: 'Ucrânia', lat: 45.3, lng: 34.3,
+                culture: 'Península estratégica de maioria étnica e linguística russa.',
+                history: 'O separatismo pró-Rússia culminou na anexação relâmpago e ilegal da península pela Federação Russa em 2014, após um referendo condenado por fraude pela comunidade internacional.',
+                task: 'Anote no caderno: Em que ano ocorreu a crise separatista e posterior anexação da Crimeia?',
+                quiz: { q: 'Do ponto de vista do Direito Internacional (ONU), a Crimeia é considerada:', options: [
+                    { text: 'Território soberano e legal da Ucrânia, ocupado pela Rússia.', isCorrect: true },
+                    { text: 'Uma nação independente recém-criada.', isCorrect: false },
+                    { text: 'Propriedade histórica legal da Turquia.', isCorrect: false }
+                ]}
             }
         ];
 
+        /* ==========================================================================
+           LÓGICA DO JOGO E SESSÃO ATUAL
+           ========================================================================== */
+        let sessionGameData = []; // Armazenará os 6 sorteados da partida
         let currentPhase = 0;
         let attempts = 0;
         let hits = 0;
@@ -351,23 +373,23 @@
         }
 
         function updateHUD() {
-            document.getElementById('hud-level').innerText = `${Math.min(currentPhase + 1, gameData.length)}/${gameData.length}`;
+            document.getElementById('hud-level').innerText = `${Math.min(currentPhase + 1, sessionGameData.length)}/${sessionGameData.length}`;
             let accuracy = attempts === 0 ? 100 : Math.round((hits / attempts) * 100);
             document.getElementById('hud-score').innerText = `${accuracy}%`;
             document.getElementById('final-score').innerText = `${accuracy}%`;
         }
 
-        // --- AQUI ESTÁ A CORREÇÃO PRINCIPAL ---
+        // --- INICIALIZAÇÃO DA PARTIDA ---
         function startGame() {
+            // Sorteia 6 regiões aleatórias do Master Database para esta partida
+            sessionGameData = [...masterGameData].sort(() => Math.random() - 0.5).slice(0, 6);
+            
             currentPhase = 0;
             attempts = 0;
             hits = 0;
             updateHUD();
             
-            // 1. Muda a tela PRIMEIRO para a div do mapa ficar visível no navegador
             switchScreen('map');
-            
-            // 2. Espera um décimo de segundo pro navegador renderizar a tela nova
             setTimeout(() => {
                 initMap();
                 loadMapPhase();
@@ -376,39 +398,32 @@
 
         function initMap() {
             if (!map) {
-                // Instancia o mapa
                 map = L.map('map-container').setView([50.0, 10.0], 4);
-                
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; OpenStreetMap &copy; CARTO',
-                    subdomains: 'abcd',
-                    maxZoom: 10,
-                    minZoom: 3
+                    subdomains: 'abcd', maxZoom: 10, minZoom: 3
                 }).addTo(map);
-
                 markerGroup = L.layerGroup().addTo(map);
             } else {
-                // Se o mapa já existia, força ele a recalcular o próprio tamanho
                 map.invalidateSize();
             }
         }
 
         function loadMapPhase() {
-            activeRegion = gameData[currentPhase];
-            document.getElementById('map-prompt').innerHTML = `Missão: Encontre a base do movimento na <strong>${activeRegion.region}</strong>.`;
+            activeRegion = sessionGameData[currentPhase];
+            document.getElementById('map-prompt').innerHTML = `Missão: Encontre a base do movimento em <strong>${activeRegion.region}</strong>.`;
             document.getElementById('map-feedback').innerText = "";
             
             markerGroup.clearLayers(); 
             map.flyTo([activeRegion.lat - 2, activeRegion.lng + 2], 4, { duration: 1.5 });
 
-            // Distratores
-            for(let i=0; i<3; i++) {
+            // Cria de 3 a 5 Distratores pelo mapa
+            for(let i=0; i<4; i++) {
                 let randomLat = Math.random() * (60 - 38) + 38; 
                 let randomLng = Math.random() * (25 - (-9)) + (-9); 
                 createRadarPin(randomLat, randomLng, false);
             }
             
-            // Pino Verdadeiro
             createRadarPin(activeRegion.lat, activeRegion.lng, true);
         }
 
@@ -416,8 +431,7 @@
             const customIcon = L.divIcon({
                 className: 'custom-radar-wrapper',
                 html: '<div class="radar-pin"></div>',
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                iconSize: [24, 24], iconAnchor: [12, 12]
             });
 
             const marker = L.marker([lat, lng], { icon: customIcon }).addTo(markerGroup);
@@ -495,16 +509,13 @@
 
         function nextPhase() {
             currentPhase++;
-            if (currentPhase < gameData.length) {
+            if (currentPhase < sessionGameData.length) {
                 updateHUD();
-                
-                // Volta para a tela do mapa E avisa o Leaflet pra se redesenhar
                 switchScreen('map');
                 setTimeout(() => {
                     map.invalidateSize();
                     loadMapPhase();
                 }, 100);
-
             } else {
                 loadBossPhase();
             }
@@ -525,8 +536,9 @@
             const colCountries = document.createElement('div'); colCountries.className = 'match-col';
             colCountries.innerHTML = '<h4>País Soberano</h4>';
 
-            let regionsData = [...gameData].sort(() => Math.random() - 0.5);
-            let countriesData = [...gameData].sort(() => Math.random() - 0.5);
+            // Embaralha APENAS os 6 sorteados para o desafio final
+            let regionsData = [...sessionGameData].sort(() => Math.random() - 0.5);
+            let countriesData = [...sessionGameData].sort(() => Math.random() - 0.5);
 
             regionsData.forEach(item => {
                 let div = document.createElement('div');
@@ -577,7 +589,7 @@
                     selectedCountry = null;
                     matchPairsCompleted++;
 
-                    if(matchPairsCompleted === gameData.length) {
+                    if(matchPairsCompleted === sessionGameData.length) {
                         setTimeout(() => switchScreen('victory'), 1000);
                     }
                 } else {
