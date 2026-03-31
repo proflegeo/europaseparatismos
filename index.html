@@ -633,21 +633,27 @@
                 map.invalidateSize();
             }
         }
+        
+function loadMapPhase() {
+    activeRegion = sessionGameData[currentPhase];
+    document.getElementById('map-prompt').innerHTML = `Missão: Encontre a base do movimento em <strong>${activeRegion.region}</strong>.`;
+    document.getElementById('map-feedback').innerText = "";
+    
+    markerGroup.clearLayers(); 
+    
+    // 1. Joga a câmera "para o alto" (visão global) instantaneamente
+    map.setView([20.0, 0.0], 2); 
+    
+    // 2. Faz o voo suave de volta para um centro genérico da Europa (sem dar zoom no alvo correto)
+    map.flyTo([49.0, 10.0], 4, { duration: 1.5 });
 
-        function loadMapPhase() {
-            activeRegion = sessionGameData[currentPhase];
-            document.getElementById('map-prompt').innerHTML = `Missão: Encontre a base do movimento em <strong>${activeRegion.region}</strong>.`;
-            document.getElementById('map-feedback').innerText = "";
-            
-            markerGroup.clearLayers(); 
-            map.flyTo([activeRegion.lat - 2, activeRegion.lng + 2], 4, { duration: 1.5 });
-
-            for(let i=0; i<4; i++) {
-                let randomLat = Math.random() * (60 - 38) + 38; 
-                let randomLng = Math.random() * (25 - (-9)) + (-9); 
-                createRadarPin(randomLat, randomLng, false);
-            }
-            createRadarPin(activeRegion.lat, activeRegion.lng, true);
+    for(let i=0; i<4; i++) {
+        let randomLat = Math.random() * (60 - 38) + 38; 
+        let randomLng = Math.random() * (25 - (-9)) + (-9); 
+        createRadarPin(randomLat, randomLng, false);
+    }
+    createRadarPin(activeRegion.lat, activeRegion.lng, true);
+}
         }
 
         function createRadarPin(lat, lng, isTarget) {
