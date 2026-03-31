@@ -2,665 +2,375 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Copa da Geografia: Dossiê Separatista</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimentos Separatistas da Europa</title>
     <style>
         :root {
-            --primary: #1e3a8a;
-            --primary-light: #dbeafe;
-            --secondary: #475569;
-            --accent: #d97706;
-            --success: #059669;
-            --danger: #dc2626;
-            --bg: #f1f5f9;
-            --surface: #ffffff;
-            --text: #0f172a;
-            --border: #cbd5e1;
-            --notebook: #fefce8;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            --bg-color: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #475569;
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --border: #e2e8f0;
+            --card-bg: #ffffff;
+            --highlight: #fef08a;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
             margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
 
         header {
-            text-align: center;
-            width: 100%;
-            max-width: 800px;
-            margin-bottom: 20px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
         }
 
         h1 {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
             color: var(--primary);
-            font-size: 1.6rem;
-            margin: 0 0 5px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        p.subtitle {
-            font-size: 0.95rem;
-            color: var(--secondary);
-            margin-bottom: 15px;
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin: 0;
         }
 
-        .status-bar {
+        .intro-box {
+            background-color: var(--card-bg);
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .instructions {
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+
+        .instructions h3 {
+            color: var(--accent);
+            margin-top: 0;
+        }
+
+        .instructions ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .module {
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .module-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--surface);
-            padding: 12px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            font-weight: 700;
-            font-size: 1rem;
-            border: 1px solid var(--border);
-        }
-
-        .level-indicator { color: var(--accent); }
-        .score-indicator { color: var(--primary); }
-
-        .game-board {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
-            max-width: 800px;
-        }
-
-        @media (min-width: 768px) {
-            .game-board { flex-direction: row; }
-            .column { flex: 1; }
-        }
-
-        .column {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
-        }
-
-        h2 {
-            text-align: center;
-            color: var(--secondary);
+            font-weight: 600;
             font-size: 1.1rem;
-            margin: 0 0 15px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 800;
+            transition: background 0.2s;
         }
 
-        /* Peças (Regiões) */
-        .piece {
-            background-color: var(--surface);
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            padding: 14px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 700;
-            text-align: center;
-            transition: all 0.2s ease;
-            font-size: 1.05rem;
-            box-shadow: 0 2px 4px rgba(30,58,138,0.1);
+        .module-header:hover {
+            background: #1e293b;
         }
 
-        .piece:active { transform: scale(0.97); }
-        
-        .piece.selected {
-            background-color: var(--primary);
-            color: white;
-            box-shadow: 0 0 0 4px var(--primary-light);
-            transform: scale(1.02);
-            z-index: 10;
-        }
-
-        .piece.solved {
-            background-color: var(--success);
-            border-color: var(--success);
-            color: white;
-            cursor: default;
-            pointer-events: none;
-            box-shadow: none;
-            margin: 0;
-            font-size: 0.95rem;
-            padding: 8px;
-        }
-
-        /* Zonas de Destino (Países) */
-        #countries-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 10px;
-        }
-
-        .dropzone {
-            background-color: var(--bg);
-            border: 2px dashed #94a3b8;
-            padding: 12px;
-            border-radius: 10px;
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-weight: 700;
-            color: var(--secondary);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .dropzone.highlight {
-            border-color: var(--primary);
-            background-color: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .dropzone.error {
-            background-color: #fef2f2;
-            border-color: var(--danger);
-            color: var(--danger);
-            animation: shake 0.4s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        /* Modals */
-        #info-modal, #victory-screen {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(5px);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 15px;
-        }
-
-        .modal-content {
-            background: var(--surface);
+        .module-content {
             padding: 25px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: slideUp 0.3s ease-out;
-            position: relative;
+            display: none;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        .module-content.active {
+            display: block;
         }
 
-        .badge {
-            background: var(--primary);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            display: inline-block;
+        .case-study {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f8fafc;
         }
 
-        .modal-content h3 { 
-            color: var(--text); 
-            margin: 0 0 15px 0; 
-            font-size: 1.8rem; 
-            border-bottom: 2px solid var(--bg);
+        .case-study h4 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--border);
             padding-bottom: 10px;
         }
 
-        .info-grid {
-            display: grid;
-            gap: 12px;
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        .info-item {
-            background: var(--bg);
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid var(--accent);
-        }
-
-        .info-item strong {
-            display: block;
-            color: var(--secondary);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .info-item span {
-            color: var(--text);
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        /* Área do Caderno */
-        .notebook-area {
-            background-color: var(--notebook);
-            border: 1px solid #fde047;
+        .research-tasks {
+            background: white;
             padding: 15px;
-            border-radius: 8px;
-            text-align: left;
-            margin-bottom: 20px;
-            background-image: repeating-linear-gradient(transparent, transparent 24px, #e2e8f0 24px, #e2e8f0 25px);
-            background-position: 0 5px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid #f59e0b;
         }
 
-        .notebook-area h4 {
-            margin: 0 0 10px 0;
-            color: #854d0e;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1.1rem;
+        .research-tasks strong {
+            display: block;
+            color: #b45309;
+            margin-bottom: 10px;
         }
 
-        .notebook-area p {
+        .tag {
+            display: inline-block;
+            background: #e2e8f0;
+            color: #475569;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* Checkbox customizado para marcar progresso */
+        .task-list {
+            list-style: none;
+            padding: 0;
             margin: 0;
-            font-size: 1.05rem;
-            line-height: 25px;
-            color: #1e293b;
-            font-style: italic;
-            font-weight: 600;
         }
 
-        .checkbox-container {
+        .task-list li {
+            margin-bottom: 10px;
+        }
+
+        .task-list label {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+        }
+
+        .task-list input[type="checkbox"] {
+            margin-top: 4px;
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .progress-container {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            background: var(--bg);
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid var(--border);
+            justify-content: space-between;
+            font-weight: bold;
         }
 
-        .checkbox-container input {
-            width: 20px;
+        progress {
+            width: 70%;
             height: 20px;
-            accent-color: var(--success);
-            cursor: pointer;
         }
-
-        .checkbox-container label {
-            font-weight: 600;
-            color: var(--text);
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .btn-action {
-            background: var(--secondary);
-            color: white;
-            border: none;
-            padding: 15px 24px;
-            font-size: 1.1rem;
-            border-radius: 12px;
-            cursor: not-allowed;
-            font-weight: 700;
-            width: 100%;
-            transition: all 0.2s;
-            opacity: 0.6;
-        }
-
-        .btn-action.active {
-            background: var(--success);
-            cursor: pointer;
-            opacity: 1;
-        }
-
-        .btn-action.active:hover { background: #047857; transform: translateY(-2px); }
-
-        .victory-content h1 { color: var(--success); font-size: 2.5rem; margin-bottom: 10px; }
-        .victory-content p { text-align: center; color: var(--text); font-weight: 500;}
 
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Geopolítica em Jogo</h1>
-        <p class="subtitle">Selecione o movimento e aloque no país atual.<br>Prepare o caderno para os dossiês!</p>
-        <div class="status-bar">
-            <div class="level-indicator">Fase <span id="current-level">1</span>/3</div>
-            <div class="score-indicator">Acertos: <span id="phase-score">0</span>/<span id="phase-total">0</span></div>
-        </div>
-    </header>
-
-    <div class="game-board" id="game-board">
-        <div class="column">
-            <h2>Movimentos (Selecione)</h2>
-            <div id="regions-container"></div>
-        </div>
-        <div class="column">
-            <h2>Países (Destino)</h2>
-            <div id="countries-container"></div>
-        </div>
+    <div class="progress-container">
+        <span>Progresso da Pesquisa:</span>
+        <progress id="progressBar" value="0" max="100"></progress>
+        <span id="progressText">0%</span>
     </div>
 
-    <div id="victory-screen">
-        <div class="modal-content victory-content">
-            <h1>🏆 Mestre Geopolítico!</h1>
-            <p>Você mapeou todos os conflitos e montou um caderno de excelência.</p>
-            <button class="btn-action active" onclick="location.reload()">Jogar Novamente</button>
-        </div>
-    </div>
+    <div class="container">
+        <header>
+            <h1>Geopolítica da Europa</h1>
+            <p class="subtitle">Aula Autoguiada: Nacionalismos e Movimentos Separatistas</p>
+        </header>
 
-    <div id="info-modal">
-        <div class="modal-content">
-            <div class="badge">Dossiê Desbloqueado</div>
-            <h3 id="modal-title">Região</h3>
-            
-            <div class="info-grid">
-                <div class="info-item">
-                    <strong>🗣️ Idioma / Cultura</strong>
-                    <span id="modal-culture">---</span>
+        <div class="intro-box">
+            <strong>O que você vai investigar hoje?</strong><br>
+            A Europa parece um continente estável, mas suas fronteiras escondem dezenas de nações sem Estado. Nesta aula, você assumirá o papel de um analista geopolítico. Seu objetivo é compreender por que regiões ricas querem se separar, por que grupos pegaram em armas no passado recente e como a identidade cultural molda o mapa europeu.
+        </div>
+
+        <div class="instructions">
+            <h3>📝 Regras da Aula e Uso do Caderno</h3>
+            <p>Para cada Estudo de Caso listado abaixo, você deve abrir seu caderno e responder a um **Dossiê Padrão** pesquisando na internet ou no material didático. O dossiê deve conter:</p>
+            <ul>
+                <li><strong>Localização e Cultura:</strong> Onde fica? Qual a língua e a identidade do povo?</li>
+                <li><strong>Motivação:</strong> É econômica? É religiosa? É puramente histórica?</li>
+                <li><strong>Ações:</strong> Como tentaram a independência? (Referendos, vias políticas, ou grupos armados/terroristas?)</li>
+                <li><strong>O Desfecho/Status Atual:</strong> Como o Estado central reagiu? Conseguiram autonomia? Estão em guerra?</li>
+            </ul>
+        </div>
+
+        <div class="module">
+            <div class="module-header" onclick="toggleModule('mod1')">
+                Módulo 1: A Fragmentação da Europa Ocidental
+                <span>▼</span>
+            </div>
+            <div class="module-content" id="mod1">
+                <p>Movimentos dentro de democracias consolidadas. Geralmente usam vias políticas, referendos e pressão econômica.</p>
+                
+                <div class="case-study">
+                    <h4>Catalunha (Espanha)</h4>
+                    <span class="tag">Econômica</span> <span class="tag">Cultural</span>
+                    <p>Uma das regiões mais ricas da Espanha possui língua própria e sente que sustenta o resto do país. Em 2017, o mundo parou para assistir ao conflito entre Barcelona e Madri.</p>
+                    <div class="research-tasks">
+                        <strong>Missão de Pesquisa (Anote no caderno):</strong>
+                        <ul class="task-list">
+                            <li><label><input type="checkbox" onchange="updateProgress()"> Pesquise e anote: O que aconteceu no "Referendo de 2017"?</label></li>
+                            <li><label><input type="checkbox" onchange="updateProgress()"> Pesquise e anote: Como o governo espanhol reagiu aos líderes separatistas?</label></li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <strong>🔥 Principal Motivação</strong>
-                    <span id="modal-motivation">---</span>
+
+                <div class="case-study">
+                    <h4>Escócia (Reino Unido)</h4>
+                    <span class="tag">Política</span> <span class="tag">Econômica (Petróleo)</span>
+                    <p>Eles tiveram a chance de sair do Reino Unido em 2014, mas votaram para ficar. Poucos anos depois, um evento geopolítico massivo mudou a opinião de muitos escoceses.</p>
+                    <div class="research-tasks">
+                        <strong>Missão de Pesquisa (Anote no caderno):</strong>
+                        <ul class="task-list">
+                            <li><label><input type="checkbox" onchange="updateProgress()"> Pesquise e anote: Qual foi a relação entre a saída do Reino Unido da União Europeia (Brexit) e o ressurgimento do separatismo escocês?</label></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-
-            <div class="notebook-area">
-                <h4>📝 Missão do Caderno</h4>
-                <p id="modal-summary">O resumo aparecerá aqui.</p>
-            </div>
-
-            <label class="checkbox-container">
-                <input type="checkbox" id="notebook-check">
-                <label for="notebook-check">Juro que copiei o resumo no caderno!</label>
-            </label>
-
-            <button class="btn-action" id="btn-continue" onclick="closeModal()" disabled>Continuar Missão</button>
         </div>
+
+        <div class="module">
+            <div class="module-header" onclick="toggleModule('mod2')">
+                Módulo 2: O Fator Histórico e as Vias Armadas
+                <span>▼</span>
+            </div>
+            <div class="module-content" id="mod2">
+                <p>Casos onde o nacionalismo gerou décadas de violência, terrorismo ou guerras civis na história recente.</p>
+
+                <div class="case-study">
+                    <h4>País Basco (Espanha/França)</h4>
+                    <span class="tag">Identitária</span> <span class="tag">Histórico Armado</span>
+                    <p>Uma cultura milenar com um idioma misterioso (Euskara). Durante a ditadura de Franco, foram duramente reprimidos, o que deu origem a um grupo que manchou de sangue a história da Espanha.</p>
+                    <div class="research-tasks">
+                        <strong>Missão de Pesquisa (Anote no caderno):</strong>
+                        <ul class="task-list">
+                            <li><label><input type="checkbox" onchange="updateProgress()"> Pesquise e anote: O que foi o grupo ETA? Quais eram seus métodos e quando ele deixou de existir?</label></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="case-study">
+                    <h4>Irlanda do Norte (Reino Unido)</h4>
+                    <span class="tag">Religiosa</span> <span class="tag">Histórico Armado</span>
+                    <p>Um conflito complexo que dividiu cidades com muros ("Linhas de Paz"). A disputa não é apenas sobre território, mas sobre a identidade entre duas vertentes do cristianismo.</p>
+                    <div class="research-tasks">
+                        <strong>Missão de Pesquisa (Anote no caderno):</strong>
+                        <ul class="task-list">
+                            <li><label><input type="checkbox" onchange="updateProgress()"> Pesquise e anote: Quem eram os Unionistas (Protestantes) e os Republicanos (Católicos/IRA)?</label></li>
+                            <li><label><input type="checkbox" onchange="updateProgress()"> Pesquise e anote: O que foi o "Acordo de Sexta-Feira Santa" de 1998?</label></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module">
+            <div class="module-header" onclick="toggleModule('mod3')">
+                Módulo 3: A Desintegração e os Bálcãs (Geopolítica de Choque)
+                <span>▼</span>
+            </div>
+            <div class="module-content" id="mod3">
+                <p>O maior exemplo moderno do que acontece quando o separatismo escala para a guerra total.</p>
+
+                <div class="case-study">
+                    <h4>O Fim da Iugoslávia e o caso de Kosovo</h4>
+                    <span class="tag">Guerra Civil</span> <span class="tag">Limpeza Étnica</span>
+                    <p>Durante a Guerra Fria, a Iugoslávia era um país que abrigava diversas etnias e religiões. Quando o país colapsou nos anos 90, os Bálcãs mergulharam em guerras brutais por independência.</p>
+                    <div class="research-tasks">
+                        <strong>Missão de Pesquisa (Anote no caderno):</strong>
+                        <ul class="task-list">
+                            <li><label><input type="checkbox" onchange="updateProgress()"> Pesquise e anote: Quais países surgiram do fim da Iugoslávia?</label></li>
+                            <li><label><input type="checkbox" onchange="updateProgress()"> Pesquise e anote: Qual é a situação diplomática atual de Kosovo (por que a Sérvia e outros países não o reconhecem)?</label></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="module">
+            <div class="module-header" onclick="toggleModule('mod4')">
+                Síntese Final: O Trabalho do Analista
+                <span>▼</span>
+            </div>
+            <div class="module-content" id="mod4">
+                <p>Após concluir as pesquisas e anotações, elabore um pequeno texto (mínimo de 10 linhas) no seu caderno respondendo à grande questão geopolítica:</p>
+                <div style="background: #1e293b; color: white; padding: 20px; border-radius: 8px; font-style: italic;">
+                    "Por que as fronteiras dos países europeus, que parecem tão definitivas nos mapas, continuam sendo questionadas no século XXI? Existe uma diferença entre ser dono de um 'Estado' e pertencer a uma 'Nação'?"
+                </div>
+                <ul class="task-list" style="margin-top: 15px;">
+                    <li><label><input type="checkbox" onchange="updateProgress()"> Redação de Síntese concluída.</label></li>
+                </ul>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        const database = [
-            // Nível 1
-            { region: "Catalunha", country: "Espanha", level: 1, 
-              culture: "Língua Catalã; Identidade histórica distinta da castelhana.", 
-              motivation: "Econômica e Identitária. Sentem que sustentam outras regiões da Espanha através de altos impostos.", 
-              summary: "A Catalunha busca separar-se da Espanha por questões histórico-culturais e insatisfação fiscal, tendo realizado um grande referendo em 2017." },
-            { region: "Escócia", country: "Reino Unido", level: 1, 
-              culture: "Identidade Celta/Escocesa; Língua Inglesa, Scots e Gaélico Escocês.", 
-              motivation: "Política e Econômica. Oposição ao Brexit (querem voltar à UE) e controle do petróleo do Mar do Norte.", 
-              summary: "A Escócia quase obteve independência no referendo de 2014. O desejo separatista ressurgiu após o Brexit, pois a região deseja voltar à União Europeia." },
-            { region: "País Basco", country: "Espanha", level: 1, 
-              culture: "Euskara (língua isolada sem parentesco com outras europeias); Forte identidade étnica.", 
-              motivation: "Étnico-Cultural e Histórica. Luta pela preservação de uma cultura milenar contra a centralização de Madri.", 
-              summary: "Região espanhola de cultura e língua únicas (Euskara). O separatismo, outrora liderado pelo violento ETA, hoje ocorre via disputa política." },
-            { region: "Irlanda do Norte", country: "Reino Unido", level: 1, 
-              culture: "Divisão profunda entre Católicos (Irlandeses) e Protestantes (Britânicos).", 
-              motivation: "Religiosa e Política. Os católicos republicanos buscam secessão para se unir à República da Irlanda.", 
-              summary: "Na Irlanda do Norte, nacionalistas católicos buscam separar-se do Reino Unido para reunificar a ilha da Irlanda, superando décadas de conflitos." },
-            { region: "Flandres", country: "Bélgica", level: 1, 
-              culture: "Língua Holandesa (Flamengo); Diferenças profundas com o sul francófono (Valônia).", 
-              motivation: "Econômica e Linguística. Flandres é mais rica e recusa-se a subsidiar o sul do país.", 
-              summary: "Região norte da Bélgica, falante de holandês. Mais rica que o resto do país, possui um forte movimento político que ameaça dividir a Bélgica." },
-
-            // Nível 2
-            { region: "Córsega", country: "França", level: 2, 
-              culture: "Língua Corsa (mais próxima do italiano do que do francês).", 
-              motivation: "Cultural e Histórica. Sentimento de abandono por parte do governo central de Paris.", 
-              summary: "Ilha francesa no Mediterrâneo com identidade própria. Após décadas de luta armada, hoje busca ampla autonomia linguística e fiscal de Paris." },
-            { region: "Republika Srpska", country: "Bósnia e Herzegovina", level: 2, 
-              culture: "Sérvios étnicos; Religião Cristã Ortodoxa.", 
-              motivation: "Étnica e Nacionalista. Desejo de unificação territorial com a Sérvia.", 
-              summary: "Entidade de maioria sérvia dentro da Bósnia. Suas lideranças frequentemente ameaçam com a secessão, desestabilizando a geopolítica dos Bálcãs." },
-            { region: "Tirol do Sul", country: "Itália", level: 2, 
-              culture: "Maioria germanófona (falam alemão) em território italiano.", 
-              motivation: "Cultural e Histórica. O território foi anexado pela Itália após a 1ª Guerra Mundial.", 
-              summary: "Região italiana onde se fala alemão. Apesar da vasta autonomia, movimentos defendem a independência ou o retorno à Áustria." },
-            { region: "Chechênia", country: "Rússia", level: 2, 
-              culture: "Etnia Chechena; Religião Islâmica.", 
-              motivation: "Religiosa e Nacionalista. Luta histórica contra o imperialismo russo no Cáucaso.", 
-              summary: "República russa de maioria islâmica que travou duas guerras sangrentas por independência. Hoje é controlada com punho de ferro por aliados de Moscou." },
-            { region: "Baviera", country: "Alemanha", level: 2, 
-              culture: "Tradições Bávaras fortes (como a Oktoberfest); Maioria Católica em contraste com o norte protestante.", 
-              motivation: "Econômica. É um dos estados mais ricos da Alemanha e contribui pesadamente para os estados mais pobres.", 
-              summary: "Estado mais rico da Alemanha (sede de Munique). Possui um movimento pacífico e minoritário que defende a criação de um país independente por questões econômicas." },
-
-            // Nível 3
-            { region: "Transnístria", country: "Moldávia", level: 3, 
-              culture: "Maioria falante de Russo e Ucraniano em um país de língua romena.", 
-              motivation: "Geopolítica. Saudosismo soviético e alinhamento total com a Rússia.", 
-              summary: "Região da Moldávia que declarou independência em 1992. Funciona como um 'estado fantasma' soviético, sem reconhecimento internacional, mas com apoio militar russo." },
-            { region: "Abecásia", country: "Geórgia", level: 3, 
-              culture: "Etnia Abecásia (distinta dos georgianos); Forte influência russa.", 
-              motivation: "Étnica e Geopolítica. Busca proteção e alinhamento com a Rússia contra a Geórgia.", 
-              summary: "Território que se separou da Geórgia após uma guerra nos anos 90. É sustentado militar e economicamente pela Rússia." },
-            { region: "Ossétia do Sul", country: "Geórgia", level: 3, 
-              culture: "Etnia Osseta; Língua própria (Iraniana).", 
-              motivation: "Étnica e Geopolítica. Deseja unificar-se com a Ossétia do Norte, que já pertence à Rússia.", 
-              summary: "Epicentro da Guerra de 2008. Região separatista da Geórgia que, além da independência prática, possui forte movimento interno para ser anexada pela Rússia." },
-            { region: "Nagorno-Karabakh", country: "Azerbaijão", level: 3, 
-              culture: "Etnia Armênia; Religião Cristã em um país (Azerbaijão) de maioria muçulmana.", 
-              motivation: "Étnica, Religiosa e Territorial. O enclave desejava pertencer à Armênia.", 
-              summary: "Enclave histórico armênio dentro do Azerbaijão. Operou como república independente por 30 anos até ser totalmente retomado militarmente pelos azeris em 2023." },
-            { region: "Circássia", country: "Rússia", level: 3, 
-              culture: "Povos Circassianos; Religião Islâmica.", 
-              motivation: "Histórica e Étnica. Buscam reparar o genocídio sofrido no século XIX e unificar suas terras.", 
-              summary: "Movimento no Cáucaso que busca a unificação dos povos circassianos (espalhados pela Rússia e diáspora) e a criação de um Estado independente." }
-        ];
-
-        const distractorCountries = ["Polônia", "Romênia", "Grécia", "Turquia", "Armênia", "Cazaquistão", "Suécia", "Portugal", "Lituânia", "Hungria", "Sérvia", "Dinamarca"];
-
-        let currentLevel = 1;
-        let itemsPerPhase = 4;
-        let currentPhaseScore = 0;
-        let currentPhaseTotal = 0;
-        let selectedPiece = null;
-
-        function shuffleArray(array) {
-            let newArray = [...array];
-            for (let i = newArray.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-            }
-            return newArray;
-        }
-
-        function initPhase(level) {
-            currentPhaseScore = 0;
-            selectedPiece = null;
-            const regionsContainer = document.getElementById('regions-container');
-            const countriesContainer = document.getElementById('countries-container');
-            
-            regionsContainer.innerHTML = '';
-            countriesContainer.innerHTML = '';
-            document.getElementById('current-level').innerText = level;
-
-            if(level === 1) itemsPerPhase = 4;
-            if(level === 2) itemsPerPhase = 5;
-            if(level === 3) itemsPerPhase = 6;
-
-            let availableMovements = database.filter(item => item.level === level);
-            let phaseData = shuffleArray(availableMovements).slice(0, itemsPerPhase);
-            
-            currentPhaseTotal = phaseData.length;
-            document.getElementById('phase-score').innerText = 0;
-            document.getElementById('phase-total').innerText = currentPhaseTotal;
-
-            let correctCountries = [...new Set(phaseData.map(d => d.country))];
-            let distractorsToAdd = level === 1 ? 2 : 3;
-            let shuffledDistractors = shuffleArray(distractorCountries);
-            let selectedDistractors = [];
-            
-            for(let country of shuffledDistractors) {
-                if(!correctCountries.includes(country)) {
-                    selectedDistractors.push(country);
-                }
-                if(selectedDistractors.length >= distractorsToAdd) break;
-            }
-
-            let allTargetCountries = shuffleArray([...correctCountries, ...selectedDistractors]);
-            let renderPhaseData = shuffleArray(phaseData);
-
-            renderPhaseData.forEach(data => {
-                let div = document.createElement('div');
-                div.className = 'piece';
-                div.setAttribute('data-target', data.country);
-                
-                // Armazenando os dados ricos no elemento
-                div.dataset.infoTitle = `${data.region} ➔ ${data.country}`;
-                div.dataset.infoCulture = data.culture;
-                div.dataset.infoMotivation = data.motivation;
-                div.dataset.infoSummary = data.summary;
-                
-                div.innerText = data.region;
-                
-                div.addEventListener('click', () => {
-                    if (div.classList.contains('solved')) return;
-
-                    if (selectedPiece) selectedPiece.classList.remove('selected');
-
-                    if (selectedPiece === div) {
-                        selectedPiece = null;
-                        highlightDropzones(false);
-                    } else {
-                        selectedPiece = div;
-                        div.classList.add('selected');
-                        highlightDropzones(true);
-                    }
-                });
-
-                regionsContainer.appendChild(div);
-            });
-
-            allTargetCountries.forEach(country => {
-                let div = document.createElement('div');
-                div.className = 'dropzone';
-                div.setAttribute('data-country', country);
-                div.innerHTML = `<span>${country}</span>`;
-
-                div.addEventListener('click', () => {
-                    if (!selectedPiece) return;
-
-                    const correctTarget = selectedPiece.getAttribute('data-target');
-                    const droppedTarget = div.getAttribute('data-country');
-
-                    if (correctTarget === droppedTarget) {
-                        selectedPiece.classList.remove('selected');
-                        selectedPiece.classList.add('solved');
-                        
-                        div.innerHTML = '';
-                        div.appendChild(selectedPiece);
-                        div.style.borderStyle = 'solid';
-                        div.style.borderColor = 'var(--success)';
-                        
-                        currentPhaseScore++;
-                        document.getElementById('phase-score').innerText = currentPhaseScore;
-                        highlightDropzones(false);
-
-                        showDossier(selectedPiece);
-                        selectedPiece = null;
-
-                    } else {
-                        div.classList.add('error');
-                        setTimeout(() => div.classList.remove('error'), 400);
-                        
-                        selectedPiece.classList.remove('selected');
-                        selectedPiece = null;
-                        highlightDropzones(false);
-                    }
-                });
-
-                countriesContainer.appendChild(div);
-            });
-        }
-
-        function highlightDropzones(active) {
-            const zones = document.querySelectorAll('.dropzone');
-            zones.forEach(zone => {
-                if (active && zone.children.length > 0 && zone.children[0].tagName === 'SPAN') {
-                    zone.classList.add('highlight');
-                } else {
-                    zone.classList.remove('highlight');
-                }
-            });
-        }
-
-        // Lógica do Checkbox do Caderno
-        const checkbox = document.getElementById('notebook-check');
-        const btnContinue = document.getElementById('btn-continue');
-
-        checkbox.addEventListener('change', function() {
-            if(this.checked) {
-                btnContinue.disabled = false;
-                btnContinue.classList.add('active');
+        // Função para abrir/fechar as sanfonas (accordion)
+        function toggleModule(id) {
+            const content = document.getElementById(id);
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
             } else {
-                btnContinue.disabled = true;
-                btnContinue.classList.remove('active');
-            }
-        });
-
-        function showDossier(pieceEl) {
-            document.getElementById('modal-title').innerText = pieceEl.dataset.infoTitle;
-            document.getElementById('modal-culture').innerText = pieceEl.dataset.infoCulture;
-            document.getElementById('modal-motivation').innerText = pieceEl.dataset.infoMotivation;
-            document.getElementById('modal-summary').innerText = pieceEl.dataset.infoSummary;
-            
-            // Reseta o checkbox e o botão
-            checkbox.checked = false;
-            btnContinue.disabled = true;
-            btnContinue.classList.remove('active');
-
-            document.getElementById('info-modal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            if(!checkbox.checked) return; // Segurança extra
-
-            document.getElementById('info-modal').style.display = 'none';
-            
-            if (currentPhaseScore === currentPhaseTotal) {
-                if (currentLevel < 3) {
-                    currentLevel++;
-                    initPhase(currentLevel);
-                } else {
-                    document.getElementById('game-board').style.display = 'none';
-                    document.querySelector('.status-bar').style.display = 'none';
-                    document.getElementById('victory-screen').style.display = 'flex';
-                }
+                content.classList.add('active');
             }
         }
 
-        initPhase(currentLevel);
+        // Função para calcular o progresso das tarefas
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const total = checkboxes.length;
+            let checked = 0;
+            
+            checkboxes.forEach(function(box) {
+                if(box.checked) checked++;
+            });
+
+            const percentage = Math.round((checked / total) * 100);
+            
+            document.getElementById('progressBar').value = percentage;
+            document.getElementById('progressText').innerText = percentage + '%';
+
+            if(percentage === 100) {
+                setTimeout(() => {
+                    alert("Parabéns! Você concluiu a Trilha Geopolítica. Revise suas anotações, elas são seu portfólio de estudo.");
+                }, 300);
+            }
+        }
     </script>
 </body>
 </html>
