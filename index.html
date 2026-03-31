@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Simulador Geopolítico: Separatismos Europeus</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
     <style>
         /* ==========================================================================
            VARIÁVEIS E RESET
@@ -45,7 +48,7 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            z-index: 10;
+            z-index: 1000; /* Acima do mapa */
         }
 
         .brand h1 { font-size: 1.2rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
@@ -79,7 +82,7 @@
         .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; transform: none; }
 
         /* ==========================================================================
-           TELA 1: MAPA DE RECONHECIMENTO (ESTILO GEOGUESSR)
+           TELA 1: MAPA GEOGUESSR (LEAFLET INTEGRATION)
            ========================================================================== */
         .mission-briefing {
             background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary);
@@ -88,33 +91,44 @@
         .mission-briefing h2 { color: var(--primary); font-size: 1.2rem; margin-bottom: 5px; }
         .mission-briefing p { color: var(--text-main); font-size: 1.1rem; }
 
-      .map-container {
-            position: relative; width: 100%; aspect-ratio: 4/3; max-height: 60vh;
-            background-color: #020617; /* Fundo do oceano escuro */
-            border-radius: 12px; border: 2px solid var(--border);
-            overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            /* Imagem PNG estável do mapa da Europa com bordas */
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Blank_map_of_Europe_-_with_borders.png/1024px-Blank_map_of_Europe_-_with_borders.png');
-            background-size: contain; /* Contain garante que o mapa inteiro apareça */
-            background-position: center;
-            background-repeat: no-repeat;
+        /* Container real do Leaflet */
+        #map-container {
+            width: 100%;
+            height: 450px;
+            max-height: 60vh;
+            background-color: #020617;
+            border-radius: 12px; 
+            border: 2px solid var(--border);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        /* Estilização do pino do radar dentro do Leaflet */
+        .leaflet-div-icon {
+            background: transparent;
+            border: none;
         }
 
         .radar-pin {
-            position: absolute; width: 24px; height: 24px;
+            position: relative; width: 24px; height: 24px;
             background: var(--accent); border-radius: 50%;
-            transform: translate(-50%, -50%); cursor: pointer;
-            border: 3px solid white; box-shadow: 0 0 15px var(--accent);
-            transition: all 0.2s; z-index: 5;
+            cursor: pointer; border: 3px solid white; 
+            box-shadow: 0 0 15px var(--accent);
+            transition: all 0.2s;
         }
+        
         .radar-pin::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             border-radius: 50%; border: 2px solid var(--accent);
             animation: pulse 1.5s infinite; pointer-events: none;
         }
+        
         @keyframes pulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
         
-        .radar-pin:hover { transform: translate(-50%, -50%) scale(1.2); background: var(--success); }
+        .radar-pin:hover { transform: scale(1.2); background: var(--success); }
+        .radar-pin.correct { background: var(--success); box-shadow: 0 0 20px var(--success); border-color: white;}
+        .radar-pin.wrong { background: var(--danger); box-shadow: none; border-color: var(--danger); animation: none;}
+        .radar-pin.wrong::after { display: none; }
 
         /* ==========================================================================
            TELA 2: DOSSIÊ & QUIZ
@@ -190,45 +204,32 @@
         <div id="screen-map" class="screen">
             <div class="mission-briefing">
                 <h2>Alvo de Reconhecimento:</h2>
-                <p id="map-prompt">Localize a Catalunha no mapa.</p>
+                <p id="map-prompt">Localize a base no mapa.</p>
             </div>
-            <div class="map-container" id="map-container">
-                </div>
+            
+            <div id="map-container"></div>
+            
             <p id="map-feedback" style="margin-top: 15px; text-align: center; font-weight: bold; height: 24px;"></p>
         </div>
 
         <div id="screen-dossier" class="screen">
             <div class="dossier-layout">
                 <div class="panel">
-                    <h3 id="dossier-title">Dossiê: Catalunha</h3>
-                    <div class="info-group">
-                        <label>País Soberano Atual</label>
-                        <p id="dossier-country">Espanha</p>
-                    </div>
-                    <div class="info-group">
-                        <label>Idioma / Identidade</label>
-                        <p id="dossier-culture">Catalão.</p>
-                    </div>
-                    <div class="info-group">
-                        <label>Histórico e Motivação</label>
-                        <p id="dossier-history">Texto rico explicativo.</p>
-                    </div>
+                    <h3 id="dossier-title">Dossiê</h3>
+                    <div class="info-group"><label>País Soberano Atual</label><p id="dossier-country"></p></div>
+                    <div class="info-group"><label>Idioma / Identidade</label><p id="dossier-culture"></p></div>
+                    <div class="info-group"><label>Histórico e Motivação</label><p id="dossier-history"></p></div>
                     <div class="notebook-task">
-                        <strong>✍️ Missão no Caderno:</strong><br>
-                        <span id="dossier-task">Anote o ano do referendo e a principal motivação.</span>
+                        <strong>✍️ Missão no Caderno:</strong><br><span id="dossier-task"></span>
                     </div>
                 </div>
-
                 <div class="panel">
                     <h3>Validação de Inteligência</h3>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Responda corretamente para provar que processou as informações e liberar a próxima fase.</p>
-                    
                     <div class="quiz-container">
-                        <div class="quiz-question" id="quiz-question">Pergunta aqui?</div>
-                        <div class="quiz-options" id="quiz-options">
-                            </div>
+                        <div class="quiz-question" id="quiz-question"></div>
+                        <div class="quiz-options" id="quiz-options"></div>
                     </div>
-
                     <div style="margin-top: 30px; text-align: right;">
                         <button class="btn" id="btn-next-mission" disabled onclick="nextPhase()">Próxima Missão</button>
                     </div>
@@ -241,9 +242,7 @@
                 <h2 style="color: var(--primary);">Desafio Final: Síntese Geopolítica</h2>
                 <p style="color: var(--text-muted);">Relacione o Movimento Separatista ao seu País correspondente para finalizar a aula.</p>
             </div>
-            
-            <div class="matching-grid" id="matching-grid">
-                </div>
+            <div class="matching-grid" id="matching-grid"></div>
         </div>
 
         <div id="screen-victory" class="screen" style="align-items: center; justify-content: center; text-align: center;">
@@ -254,21 +253,20 @@
             </p>
             <button class="btn" onclick="location.reload()">Reiniciar Aula</button>
         </div>
-
     </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
         /* ==========================================================================
-           BANCO DE DADOS DA AULA (CONTEÚDO GEOPOLÍTICO)
+           BANCO DE DADOS DA AULA (AGORA COM LATITUDE E LONGITUDE REAIS)
            ========================================================================== */
         const gameData = [
             {
-                id: 'catalunha',
-                region: 'Catalunha',
-                country: 'Espanha',
-                mapX: 20, mapY: 75, // Coordenadas em % baseadas no mapa europeu (aproximadas para o layout)
+                id: 'catalunha', region: 'Catalunha', country: 'Espanha',
+                lat: 41.8781, lng: 1.5, // Coordenadas reais
                 culture: 'Língua e cultura catalãs. Possuem instituições próprias históricas.',
-                history: 'Uma das regiões mais ricas e industrializadas da Espanha. A principal motivação atual é econômica e fiscal (sentem que pagam impostos desproporcionais para sustentar o resto do país) e identitária. Em 2017, realizaram um Referendo de Independência considerado ilegal por Madri, resultando na prisão ou fuga de seus líderes e forte tensão política.',
+                history: 'Uma das regiões mais ricas e industrializadas da Espanha. A principal motivação atual é econômica e fiscal. Em 2017, realizaram um Referendo de Independência considerado ilegal por Madri, resultando na prisão ou fuga de seus líderes e forte tensão política.',
                 task: 'Resuma no caderno: Qual foi a motivação principal da Catalunha para o referendo de 2017 e qual foi a reação do governo espanhol?',
                 quiz: {
                     q: 'O que culminou na grande crise política da Catalunha em 2017?',
@@ -280,29 +278,25 @@
                 }
             },
             {
-                id: 'escocia',
-                region: 'Escócia',
-                country: 'Reino Unido',
-                mapX: 28, mapY: 35,
+                id: 'escocia', region: 'Escócia', country: 'Reino Unido',
+                lat: 56.4907, lng: -4.2026,
                 culture: 'Identidade Celta; Língua inglesa e gaélico escocês.',
-                history: 'Faz parte do Reino Unido, mas mantém forte autonomia. Em 2014, realizaram um referendo oficial e a maioria votou por permanecer no Reino Unido. No entanto, a saída do Reino Unido da União Europeia (Brexit) reacendeu o desejo separatista, pois a maioria dos escoceses desejava continuar no bloco europeu.',
-                task: 'Anote no caderno: Qual evento político recente (envolvendo a Europa) reacendeu o desejo de independência da Escócia?',
+                history: 'Mantém forte autonomia. Em 2014, realizaram um referendo oficial e a maioria votou por permanecer no Reino Unido. No entanto, o Brexit reacendeu o desejo separatista, pois a maioria dos escoceses desejava continuar na União Europeia.',
+                task: 'Anote no caderno: Qual evento político recente reacendeu o desejo de independência da Escócia?',
                 quiz: {
                     q: 'Por que o nacionalismo escocês ganhou força novamente após 2016?',
                     options: [
                         { text: 'Devido à insatisfação com a saída do Reino Unido da União Europeia (Brexit).', isCorrect: true },
                         { text: 'Porque a Inglaterra tentou proibir o idioma escocês.', isCorrect: false },
-                        { text: 'Pela descoberta de novas minas de ouro na região das Highlands.', isCorrect: false }
+                        { text: 'Pela descoberta de novas minas de ouro na região.', isCorrect: false }
                     ]
                 }
             },
             {
-                id: 'paisbasco',
-                region: 'País Basco',
-                country: 'Espanha',
-                mapX: 18, mapY: 70,
+                id: 'paisbasco', region: 'País Basco', country: 'Espanha',
+                lat: 43.0, lng: -2.5,
                 culture: 'Língua Euskara (idioma isolado, sem parentesco na Europa).',
-                history: 'Uma região com forte identidade que sofreu severa repressão cultural durante a ditadura de Francisco Franco. Isso gerou o surgimento do ETA, um grupo terrorista que lutou pela independência através de atentados por décadas. Hoje, o ETA foi dissolvido e o movimento separatista atua pacificamente através de partidos políticos.',
+                history: 'Sofreu severa repressão cultural durante a ditadura de Francisco Franco. Isso gerou o surgimento do ETA, grupo que lutou pela independência através de atentados por décadas. Hoje, o ETA foi dissolvido e o movimento atua pacificamente.',
                 task: 'Pesquise e anote: O que foi o ETA e como o separatismo basco atua nos dias de hoje?',
                 quiz: {
                     q: 'Qual é a situação atual do movimento separatista no País Basco?',
@@ -314,12 +308,10 @@
                 }
             },
             {
-                id: 'irlandanorte',
-                region: 'Irlanda do Norte',
-                country: 'Reino Unido',
-                mapX: 25, mapY: 42,
+                id: 'irlandanorte', region: 'Irlanda do Norte', country: 'Reino Unido',
+                lat: 54.6, lng: -6.8,
                 culture: 'Divisão profunda: Protestantes (leais ao Reino Unido) vs Católicos (Nacionalistas irlandeses).',
-                history: 'Palco de um conflito violento conhecido como "The Troubles" durante décadas. Os nacionalistas (católicos) queriam se separar do Reino Unido e se unir à República da Irlanda, usando o grupo armado IRA. O Acordo de Sexta-Feira Santa (1998) trouxe paz à região, estabelecendo um governo compartilhado.',
+                history: 'Palco de um conflito violento conhecido como "The Troubles". Os nacionalistas católicos queriam se separar do Reino Unido e se unir à República da Irlanda. O Acordo de Sexta-Feira Santa (1998) trouxe paz à região.',
                 task: 'Anote no caderno: Qual era o principal objetivo dos nacionalistas católicos na Irlanda do Norte?',
                 quiz: {
                     q: 'Diferente de outros movimentos, o que os nacionalistas da Irlanda do Norte buscavam?',
@@ -331,13 +323,11 @@
                 }
             },
             {
-                id: 'kosovo',
-                region: 'Kosovo',
-                country: 'Sérvia',
-                mapX: 58, mapY: 72,
+                id: 'kosovo', region: 'Kosovo', country: 'Sérvia',
+                lat: 42.6026, lng: 20.9029,
                 culture: 'Maioria de etnia Albanesa (muçulmanos), dentro de território histórico Sérvio (cristãos ortodoxos).',
-                history: 'Após a desintegração da Iugoslávia nos anos 90, o Kosovo sofreu brutal repressão da Sérvia, gerando uma guerra e intervenção da OTAN. Em 2008, Kosovo declarou independência de forma unilateral. Hoje, é reconhecido por cerca de 100 países, mas a Sérvia, Rússia e outros (inclusive o Brasil) ainda o consideram uma província rebelde.',
-                task: 'Anote no caderno: Qual é o status diplomático do Kosovo hoje? Todos os países o consideram um país?',
+                history: 'Após a desintegração da Iugoslávia nos anos 90, o Kosovo sofreu brutal repressão da Sérvia, gerando intervenção da OTAN. Em 2008, Kosovo declarou independência. É reconhecido por cerca de 100 países, mas a Sérvia ainda o considera uma província rebelde.',
+                task: 'Anote no caderno: Qual é o status diplomático do Kosovo hoje?',
                 quiz: {
                     q: 'Qual é o principal obstáculo geopolítico do Kosovo hoje?',
                     options: [
@@ -350,12 +340,14 @@
         ];
 
         /* ==========================================================================
-           LÓGICA DO MOTOR DO JOGO
+           LÓGICA DO MAPA E DO JOGO
            ========================================================================== */
         let currentPhase = 0;
         let attempts = 0;
         let hits = 0;
         let activeRegion = null;
+        let map = null;
+        let markerGroup = null;
 
         const screens = {
             intro: document.getElementById('screen-intro'),
@@ -368,6 +360,11 @@
         function switchScreen(screenName) {
             Object.values(screens).forEach(s => s.classList.remove('active'));
             screens[screenName].classList.add('active');
+            
+            // O Leaflet precisa recalcular o tamanho quando o container passa de display:none para flex/block
+            if(screenName === 'map' && map) {
+                setTimeout(() => map.invalidateSize(), 100);
+            }
         }
 
         function updateHUD() {
@@ -382,62 +379,88 @@
             attempts = 0;
             hits = 0;
             updateHUD();
+            initMap();
             loadMapPhase();
         }
 
-        // --- FASE 1: MAPA ---
+        // Inicializa o Mapa Leaflet
+        function initMap() {
+            if (!map) {
+                // Centraliza na Europa com zoom ajustado
+                map = L.map('map-container').setView([50.0, 10.0], 4);
+                
+                // Usando CartoDB Dark Matter (Estilo Militar/Inteligência sem precisar de API Key)
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 10,
+                    minZoom: 3
+                }).addTo(map);
+
+                markerGroup = L.layerGroup().addTo(map);
+            }
+        }
+
         function loadMapPhase() {
             activeRegion = gameData[currentPhase];
             document.getElementById('map-prompt').innerHTML = `Missão: Encontre a base do movimento na <strong>${activeRegion.region}</strong>.`;
             document.getElementById('map-feedback').innerText = "";
-            document.getElementById('map-feedback').style.color = "inherit";
             
-            const mapContainer = document.getElementById('map-container');
-            mapContainer.innerHTML = ''; // Limpa pinos anteriores
+            markerGroup.clearLayers(); // Limpa pinos anteriores do mapa
 
-            // Cria pinos falsos (distratores)
-            for(let i=0; i<4; i++) {
-                createPin(
-                    Math.random() * 80 + 10, // X aleatório entre 10% e 90%
-                    Math.random() * 80 + 10, // Y aleatório
-                    false
-                );
+            // Centraliza o mapa suavemente perto da região (mas não exato, para o aluno procurar)
+            map.flyTo([activeRegion.lat - 2, activeRegion.lng + 2], 4, { duration: 1.5 });
+
+            // Cria 3 pinos falsos (distratores em coordenadas aleatórias da Europa)
+            for(let i=0; i<3; i++) {
+                let randomLat = Math.random() * (60 - 38) + 38; // Entre Espanha e Noruega
+                let randomLng = Math.random() * (25 - (-9)) + (-9); // Entre Portugal e Leste Europeu
+                createRadarPin(randomLat, randomLng, false);
             }
             
             // Cria o pino verdadeiro
-            createPin(activeRegion.mapX, activeRegion.mapY, true);
+            createRadarPin(activeRegion.lat, activeRegion.lng, true);
             
             switchScreen('map');
         }
 
-        function createPin(x, y, isTarget) {
-            const pin = document.createElement('div');
-            pin.className = 'radar-pin';
-            pin.style.left = `${x}%`;
-            pin.style.top = `${y}%`;
+        function createRadarPin(lat, lng, isTarget) {
+            // Cria um ícone HTML customizado usando o CSS que já tínhamos
+            const customIcon = L.divIcon({
+                className: 'custom-radar-wrapper',
+                html: '<div class="radar-pin"></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            const marker = L.marker([lat, lng], { icon: customIcon }).addTo(markerGroup);
             
-            pin.onclick = () => handlePinClick(isTarget, pin);
-            document.getElementById('map-container').appendChild(pin);
+            marker.on('click', function(e) {
+                handlePinClick(isTarget, e.target);
+            });
         }
 
-        function handlePinClick(isTarget, pinElement) {
+        function handlePinClick(isTarget, markerInstance) {
             attempts++;
             const feedback = document.getElementById('map-feedback');
+            const pinElement = markerInstance.getElement().querySelector('.radar-pin');
             
             if(isTarget) {
                 hits++;
-                pinElement.style.backgroundColor = 'var(--success)';
+                pinElement.classList.add('correct');
                 feedback.innerText = "Alvo Confirmado! Baixando Dossiê...";
                 feedback.style.color = 'var(--success)';
                 updateHUD();
                 
-                // Desabilita cliques
-                document.querySelectorAll('.radar-pin').forEach(p => p.style.pointerEvents = 'none');
+                // Desativa cliques nos outros marcadores
+                markerGroup.eachLayer(layer => layer.off('click'));
                 
-                setTimeout(() => loadDossierPhase(), 1200);
+                // Dá um zoom dramático no alvo antes de mudar de tela
+                map.flyTo(markerInstance.getLatLng(), 6, { duration: 1 });
+                
+                setTimeout(() => loadDossierPhase(), 1500);
             } else {
-                pinElement.style.backgroundColor = 'var(--danger)';
-                pinElement.style.boxShadow = 'none';
+                pinElement.classList.add('wrong');
                 feedback.innerText = "Coordenada Errada. Tente outro sinal de radar.";
                 feedback.style.color = 'var(--danger)';
                 updateHUD();
@@ -446,21 +469,17 @@
 
         // --- FASE 2: DOSSIÊ E QUIZ ---
         function loadDossierPhase() {
-            // Preenche textos
             document.getElementById('dossier-title').innerText = `Dossiê: ${activeRegion.region}`;
             document.getElementById('dossier-country').innerText = activeRegion.country;
             document.getElementById('dossier-culture').innerText = activeRegion.culture;
             document.getElementById('dossier-history').innerText = activeRegion.history;
             document.getElementById('dossier-task').innerText = activeRegion.task;
             
-            // Renderiza Quiz
             document.getElementById('quiz-question').innerText = activeRegion.quiz.q;
             const optionsContainer = document.getElementById('quiz-options');
             optionsContainer.innerHTML = '';
             
-            // Embaralha opções
             let options = [...activeRegion.quiz.options].sort(() => Math.random() - 0.5);
-            
             const btnNext = document.getElementById('btn-next-mission');
             btnNext.disabled = true;
 
@@ -476,20 +495,17 @@
         }
 
         function handleQuizAnswer(btnElement, isCorrect, container, nextBtn) {
-            // Remove classes antigas
             Array.from(container.children).forEach(child => {
                 child.classList.remove('correct', 'wrong');
-                child.style.pointerEvents = 'none'; // Trava após responder
+                child.style.pointerEvents = 'none';
             });
 
             if(isCorrect) {
                 btnElement.classList.add('correct');
-                nextBtn.disabled = false; // Libera progresso
+                nextBtn.disabled = false;
             } else {
                 btnElement.classList.add('wrong');
-                // Revela a correta
                 Array.from(container.children).forEach(child => {
-                    // Busca qual era a correta no array de dados
                     let correctText = activeRegion.quiz.options.find(o => o.isCorrect).text;
                     if(child.innerText === correctText) child.classList.add('correct');
                 });
@@ -522,7 +538,6 @@
             const colCountries = document.createElement('div'); colCountries.className = 'match-col';
             colCountries.innerHTML = '<h4>País Soberano</h4>';
 
-            // Embaralha para o grid
             let regionsData = [...gameData].sort(() => Math.random() - 0.5);
             let countriesData = [...gameData].sort(() => Math.random() - 0.5);
 
@@ -554,7 +569,6 @@
         function selectMatchItem(type, element) {
             if(element.classList.contains('matched')) return;
 
-            // Remove seleção anterior da mesma coluna
             document.querySelectorAll(`.${type}-item`).forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
 
@@ -567,7 +581,6 @@
         function checkMatch() {
             if(selectedRegion && selectedCountry) {
                 if(selectedRegion.dataset.id === selectedCountry.dataset.id) {
-                    // Acerto
                     selectedRegion.classList.remove('selected');
                     selectedCountry.classList.remove('selected');
                     selectedRegion.classList.add('matched');
@@ -581,7 +594,6 @@
                         setTimeout(() => switchScreen('victory'), 1000);
                     }
                 } else {
-                    // Erro
                     selectedRegion.classList.add('error');
                     selectedCountry.classList.add('error');
                     
