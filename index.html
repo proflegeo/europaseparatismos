@@ -88,13 +88,16 @@
         .mission-briefing h2 { color: var(--primary); font-size: 1.2rem; margin-bottom: 5px; }
         .mission-briefing p { color: var(--text-main); font-size: 1.1rem; }
 
-        .map-container {
+      .map-container {
             position: relative; width: 100%; aspect-ratio: 4/3; max-height: 60vh;
-            background-color: #1e293b; border-radius: 12px; border: 2px solid var(--border);
+            background-color: #020617; /* Fundo do oceano escuro */
+            border-radius: 12px; border: 2px solid var(--border);
             overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            /* Imagem baseada no mapa da Europa - fallback seguro */
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/e6/Blank_map_of_Europe.svg');
-            background-size: cover; background-position: center; filter: invert(0.8) hue-rotate(180deg) opacity(0.7);
+            /* Imagem PNG estável do mapa da Europa com bordas */
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Blank_map_of_Europe_-_with_borders.png/1024px-Blank_map_of_Europe_-_with_borders.png');
+            background-size: contain; /* Contain garante que o mapa inteiro apareça */
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .radar-pin {
