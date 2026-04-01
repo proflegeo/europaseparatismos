@@ -48,9 +48,10 @@
         .brand h1 { font-size: 1.2rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin: 0; }
         .brand span { color: var(--text-muted); font-size: 0.8rem; }
         
-        .hud { display: flex; gap: 15px; font-size: 0.9rem; font-weight: bold; }
+        .hud { display: flex; gap: 15px; font-size: 0.9rem; font-weight: bold; flex-wrap: wrap; }
         .hud-item { background: var(--bg-dark); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); }
         .hud-accent { color: var(--accent); }
+        .hud-lives { color: #ef4444; letter-spacing: 2px; }
 
         main { flex: 1; position: relative; display: flex; flex-direction: column; }
         
@@ -74,6 +75,9 @@
         }
         .btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
         .btn:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; transform: none; }
+        
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #dc2626; }
 
         .mission-briefing {
             background: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--primary);
@@ -93,11 +97,7 @@
             z-index: 1;
         }
 
-        /* FILTRO PARA DEIXAR O MAPA MENOS ESCURO */
-        .leaflet-tile {
-            filter: brightness(1.5) contrast(0.95);
-        }
-
+        .leaflet-tile { filter: brightness(1.5) contrast(0.95); }
         .leaflet-div-icon { background: transparent; border: none; }
 
         .radar-pin {
@@ -135,10 +135,18 @@
 
         .quiz-container { margin-top: 20px; }
         .quiz-question { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; }
-        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        
+        /* O truque do grid para igualar os tamanhos das alternativas */
+        .quiz-options { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            grid-auto-rows: 1fr; 
+            gap: 10px; 
+        }
         .quiz-option {
-            background: var(--bg-dark); border: 1px solid var(--border); padding: 12px 15px;
+            background: var(--bg-dark); border: 1px solid var(--border); padding: 15px;
             border-radius: 8px; cursor: pointer; transition: background 0.2s; color: var(--text-main);
+            display: flex; align-items: center; line-height: 1.4;
         }
         .quiz-option:hover { background: #334155; }
         .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--success); color: var(--success); }
@@ -169,6 +177,7 @@
         </div>
         <div class="hud">
             <div class="hud-item">Nível: <span id="hud-level" class="hud-accent">0/6</span></div>
+            <div class="hud-item">Vidas: <span id="hud-lives" class="hud-lives">❤️❤️❤️</span></div>
             <div class="hud-item">Precisão: <span id="hud-score" class="hud-accent">100%</span></div>
         </div>
     </header>
@@ -177,8 +186,9 @@
         <div id="screen-intro" class="screen active" style="align-items: center; justify-content: center; text-align: center;">
             <h1 style="font-size: 2.5rem; color: var(--primary); margin-bottom: 15px;">Missão: Europa Fragmentada</h1>
             <p style="font-size: 1.2rem; max-width: 600px; color: var(--text-muted); margin-bottom: 30px; line-height: 1.6;">
-                Você foi designado para mapear os principais focos de tensão separatista no continente europeu. 
-                Sua missão envolve localizar os movimentos, analisar os dossiês de inteligência e registrar os dados críticos no seu caderno.
+                Você foi designado para mapear os principais focos de tensão separatista. 
+                Sua missão envolve localizar os movimentos no radar, analisar os dossiês e registrar os dados no caderno. 
+                <strong>Atenção: Você tem apenas 3 vidas por missão.</strong>
             </p>
             <button class="btn" onclick="startGame()">Iniciar Simulação</button>
         </div>
@@ -191,7 +201,8 @@
             
             <div id="map-container"></div>
             <p id="map-feedback" style="margin-top: 15px; text-align: center; font-weight: bold; height: 24px;"></p>
-            <button id="btn-advance-map" class="btn" style="display: none; margin: 0 auto;" onclick="loadDossierPhase()">Já anotei! Avançar para Dossiê</button>
+            
+            <button id="btn-advance-map" class="btn" style="display: none; margin: 15px auto 0 auto;" onclick="loadDossierPhase()">Já anotei no mapa! Avançar para Dossiê</button>
         </div>
 
         <div id="screen-dossier" class="screen">
@@ -227,19 +238,28 @@
             <div class="matching-grid" id="matching-grid"></div>
         </div>
 
+        <div id="screen-gameover" class="screen" style="align-items: center; justify-content: center; text-align: center;">
+            <h1 style="font-size: 3rem; color: var(--danger); margin-bottom: 15px;">Missão Fracassada</h1>
+            <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin-bottom: 30px;">
+                Você cometeu erros críticos no reconhecimento aéreo. A operação foi comprometida.
+                Reorganize as informações e tente concluir a mesma rota de reconhecimento.
+            </p>
+            <button class="btn btn-danger" onclick="restartMission()">Reiniciar Missão</button>
+        </div>
+
         <div id="screen-victory" class="screen" style="align-items: center; justify-content: center; text-align: center;">
             <h1 style="font-size: 3rem; color: var(--success); margin-bottom: 15px;">Missão Cumprida!</h1>
             <p style="font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin-bottom: 30px;">
                 Você mapeou as tensões com uma precisão de <span id="final-score" class="hud-accent">100%</span>.
             </p>
-            <button class="btn" onclick="location.reload()">Jogar Novamente</button>
+            <button class="btn" onclick="startGame()">Iniciar Nova Missão (Outros Países)</button>
         </div>
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
     <script>
-    const masterGameData = [
+        const masterGameData = [
             {
                 id: 'baviera', region: 'Baviera', country: 'Alemanha', lat: 48.79, lng: 11.49,
                 culture: 'Cultura bávara forte, dialeto próprio e tradições locais.',
@@ -467,7 +487,7 @@
                 task: 'Anote no caderno: O que engatilharia o separatismo?',
                 quiz: { q: 'Apesar de estar localizada dentro da República da Moldávia, a Gagaúzia possui forte e claro alinhamento político com:', options: [
                     { text: 'A União Europeia e suas políticas de integração socioeconômica.', isCorrect: false },
-                    { text: 'A alta cúpula do governo da Rússia e seus projetos geopolíticos no leste europeu.', isCorrect: true },
+                    { text: 'A alta cúpula do governo da Rússia e seus projetos geopolíticos.', isCorrect: true },
                     { text: 'A diplomacia dos Estados Unidos e as diretrizes globais da OTAN.', isCorrect: false }
                 ]}
             },
@@ -478,8 +498,8 @@
                 task: 'Anote no caderno: Qual partido lidera a Escócia?',
                 quiz: { q: 'Qual foi o principal fator contemporâneo que reacendeu as discussões sobre um novo referendo de independência escocês?', options: [
                     { text: 'A insatisfação política geral gerada devido às consequências do Brexit.', isCorrect: true },
-                    { text: 'O acirramento das hostilidades, após o governo inglês declarar guerra à região.', isCorrect: false },
-                    { text: 'O fator econômico estimulado pela descoberta de reservas de ouro nas Highlands.', isCorrect: false }
+                    { text: 'O acirramento das hostilidades, após o governo inglês declarar guerra.', isCorrect: false },
+                    { text: 'O fator econômico estimulado pela descoberta de reservas de ouro.', isCorrect: false }
                 ]}
             },
             {
@@ -488,9 +508,9 @@
                 history: 'Os republicanos buscam secessão para reunificação com a Irlanda.',
                 task: 'Anote no caderno: O que os republicanos buscam?',
                 quiz: { q: 'Historicamente, as vertentes mais nacionalistas do movimento norte-irlandês buscam:', options: [
-                    { text: 'Conquistar poder para transformar Belfast na nova sede administrativa do Reino Unido.', isCorrect: false },
-                    { text: 'Declarar a secessão de Londres para promover a reunificação com a República da Irlanda.', isCorrect: true },
-                    { text: 'Promover uma revolução para abolir a monarquia e instaurar uma nova república britânica.', isCorrect: false }
+                    { text: 'Conquistar poder para transformar Belfast na nova sede do Reino Unido.', isCorrect: false },
+                    { text: 'Declarar a secessão de Londres para promover a reunificação com a Irlanda.', isCorrect: true },
+                    { text: 'Promover uma revolução para abolir a monarquia e instaurar uma república.', isCorrect: false }
                 ]}
             },
             {
@@ -499,9 +519,9 @@
                 history: 'O nacionalismo galês (Plaid Cymru) cresceu politicamente nos últimos anos.',
                 task: 'Anote no caderno: Nome do partido nacionalista.',
                 quiz: { q: 'Analisando os métodos de atuação atuais, como pode ser categorizado o movimento de independência do País de Gales?', options: [
-                    { text: 'Como uma grave insurgência armada que se utiliza de táticas de guerrilha urbana.', isCorrect: false },
-                    { text: 'Como um movimento político e pacífico em constante crescimento eleitoral institucional.', isCorrect: true },
-                    { text: 'Como um projeto geopolítico finalizado e já reconhecido pelas organizações internacionais.', isCorrect: false }
+                    { text: 'Como uma grave insurgência armada que se utiliza de táticas de guerrilha.', isCorrect: false },
+                    { text: 'Como um movimento político e pacífico em constante crescimento eleitoral.', isCorrect: true },
+                    { text: 'Como um projeto geopolítico finalizado e já reconhecido.', isCorrect: false }
                 ]}
             },
             {
@@ -510,9 +530,9 @@
                 history: 'Movimento minoritário para proteger identidade e autonomia.',
                 task: 'Anote no caderno: Cornualha é massa ou minoria?',
                 quiz: { q: 'Localizada no sudoeste inglês, qual é a principal bandeira levantada pelo atual movimento na Cornualha?', options: [
-                    { text: 'A criação de uma nova moeda para romper com o mercado financeiro da Inglaterra.', isCorrect: false },
-                    { text: 'O resgate da autonomia e preservação da cultura para o reconhecimento como minoria nacional.', isCorrect: true },
-                    { text: 'A articulação de um acordo geopolítico para uma anexação por parte do governo da França.', isCorrect: false }
+                    { text: 'A criação de uma nova moeda para romper com a Inglaterra.', isCorrect: false },
+                    { text: 'O resgate da autonomia para o reconhecimento como minoria nacional.', isCorrect: true },
+                    { text: 'A articulação de um acordo geopolítico para uma anexação pela França.', isCorrect: false }
                 ]}
             },
             {
@@ -521,9 +541,9 @@
                 history: 'Travou duas guerras contra Moscou. Hoje é controlada e o separatismo atua no exílio.',
                 task: 'Anote no caderno: Como a Rússia lidou com a Chechênia?',
                 quiz: { q: 'Após as guerras travadas contra o poder central russo, qual a situação do movimento pela independência da Chechênia hoje?', options: [
-                    { text: 'Operando de forma conjunta e pacífica diretamente através do parlamento de Moscou.', isCorrect: false },
-                    { text: 'Atuando de maneira legalizada através de manifestações constantes nas praças da capital.', isCorrect: false },
-                    { text: 'Fortemente reprimido pelas forças de segurança, operando suas demandas majoritariamente a partir do exílio.', isCorrect: true }
+                    { text: 'Operando de forma conjunta e pacífica diretamente através de Moscou.', isCorrect: false },
+                    { text: 'Atuando de maneira legalizada através de manifestações na capital.', isCorrect: false },
+                    { text: 'Fortemente reprimido pelas forças de segurança, operando no exílio.', isCorrect: true }
                 ]}
             },
             {
@@ -532,9 +552,9 @@
                 history: 'Foco no resgate de terras e reconhecimento do genocídio do séc. XIX.',
                 task: 'Anote no caderno: O que os circassianos buscam?',
                 quiz: { q: 'O movimento nacionalista liderado pelo povo circassiano fundamenta grande parte da sua luta política nas memórias do quê?', options: [
-                    { text: 'Nas urgentes demandas ligadas ao controle da extração regional do gás e petróleo bruto.', isCorrect: false },
-                    { text: 'Nos traumas históricos e no não-reconhecimento do genocídio e expulsão que a população sofreu no século XIX.', isCorrect: true },
-                    { text: 'Nos embargos e conflitos aduaneiros deflagrados recentemente contra os agentes da União Europeia.', isCorrect: false }
+                    { text: 'Nas urgentes demandas ligadas ao controle da extração de petróleo bruto.', isCorrect: false },
+                    { text: 'Nos traumas históricos e no genocídio que a população sofreu no século XIX.', isCorrect: true },
+                    { text: 'Nos embargos e conflitos deflagrados contra a União Europeia.', isCorrect: false }
                 ]}
             },
             {
@@ -543,9 +563,9 @@
                 history: 'Manifestou-se via insurgência islâmica clandestina de baixa intensidade.',
                 task: 'Anote no caderno: Como se manifestou recentemente?',
                 quiz: { q: 'Como se caracterizou a luta separatista no início do século XXI dentro destas repúblicas no Cáucaso do Norte?', options: [
-                    { text: 'Através de uma forte insurgência armada promovida por militantes clandestinos e de atuação descentralizada contra o exército.', isCorrect: true },
-                    { text: 'Por meio do uso contínuo de petições civis pacíficas entregues pelos líderes comunitários ao parlamento em Moscou.', isCorrect: false },
-                    { text: 'Através do engajamento em uma luta cultural baseada em promover a adoção do idioma russo como uma língua exclusiva.', isCorrect: false }
+                    { text: 'Através de uma forte insurgência armada descentralizada contra o exército.', isCorrect: true },
+                    { text: 'Por meio do uso contínuo de petições civis pacíficas entregues em Moscou.', isCorrect: false },
+                    { text: 'Através do engajamento cultural baseada em promover o idioma russo.', isCorrect: false }
                 ]}
             },
             {
@@ -554,9 +574,9 @@
                 history: 'Declarou independência em 2008. Estado de facto, com reconhecimento internacional parcial.',
                 task: 'Anote no caderno: Nível de reconhecimento diplomático?',
                 quiz: { q: 'Após a declaração unilateral de separação formal em 2008, a situação legal da soberania internacional do Kosovo é considerada:', options: [
-                    { text: 'Uma conquista validada universalmente, sendo ratificada como Estado-Membro pela Organização das Nações Unidas.', isCorrect: false },
-                    { text: 'Praticamente inexistente na prática, sendo o território administrado diretamente pelo governo estabelecido na Sérvia.', isCorrect: false },
-                    { text: 'Amplamente contestada; atua como independente, mas amarga o não reconhecimento político promovido pela Sérvia e aliados.', isCorrect: true }
+                    { text: 'Uma conquista validada universalmente, sendo ratificada pela ONU.', isCorrect: false },
+                    { text: 'Praticamente inexistente, sendo o território administrado pela Sérvia.', isCorrect: false },
+                    { text: 'Amplamente contestada; amarga o não reconhecimento político pela Sérvia.', isCorrect: true }
                 ]}
             },
             {
@@ -565,9 +585,9 @@
                 history: 'Epicentro do conflito e separatismo pró-Rússia (2014). Anexadas militarmente por Moscou.',
                 task: 'Anote no caderno: Quem patrocinou o conflito?',
                 quiz: { q: 'A atual situação do território situado nessas duas províncias do Leste Europeu é de que:', options: [
-                    { text: 'Após acordos diplomáticos, as províncias encontram-se pacíficas e foram integradas sob comando legal do governo da Ucrânia mais uma vez.', isCorrect: false },
-                    { text: 'Como desdobramento do levante separatista de 2014, grande parte delas encontra-se hoje formalmente ocupada e militarmente anexada à Federação Russa.', isCorrect: true },
-                    { text: 'Ambas rapidamente tornaram-se estados autossuficientes soberanos após a sua unânime e pacífica adesão aos blocos normativos da União Europeia.', isCorrect: false }
+                    { text: 'Após acordos, as províncias foram integradas ao governo da Ucrânia.', isCorrect: false },
+                    { text: 'Como desdobramento do levante, encontram-se militarmente anexadas à Rússia.', isCorrect: true },
+                    { text: 'Tornaram-se estados autossuficientes após adesão à União Europeia.', isCorrect: false }
                 ]}
             },
             {
@@ -576,9 +596,9 @@
                 history: 'Anexação ilegal pela Rússia em 2014 após referendo fraudulento.',
                 task: 'Anote no caderno: Em que ano ocorreu?',
                 quiz: { q: 'Do estrito ponto de vista estabelecido pelo Direito Internacional e pela ONU, a estratégica península da Crimeia é considerada como:', options: [
-                    { text: 'Um inquestionável território histórico da Ucrânia, que atualmente encontra-se fisicamente ocupado de modo ilícito pelas forças militares da Rússia.', isCorrect: true },
-                    { text: 'Uma recém-criada nação insular, detentora de um inovador governo independente, cuja declaração de secessão tem sido celebrada pelas superpotências.', isCorrect: false },
-                    { text: 'Uma valiosa propriedade e herança imperial outorgada pelos tratados do passado aos plenos direitos administrativos do atual governo da Turquia.', isCorrect: false }
+                    { text: 'Um inquestionável território histórico da Ucrânia, ocupado pela Rússia.', isCorrect: true },
+                    { text: 'Uma recém-criada nação insular, cuja secessão tem sido celebrada.', isCorrect: false },
+                    { text: 'Uma valiosa propriedade e herança imperial outorgada à Turquia.', isCorrect: false }
                 ]}
             }
         ];
@@ -587,6 +607,7 @@
         let currentPhase = 0;
         let attempts = 0;
         let hits = 0;
+        let lives = 3;
         let activeRegion = null;
         let map = null;
         let markerGroup = null;
@@ -596,6 +617,7 @@
             map: document.getElementById('screen-map'),
             dossier: document.getElementById('screen-dossier'),
             boss: document.getElementById('screen-boss'),
+            gameover: document.getElementById('screen-gameover'),
             victory: document.getElementById('screen-victory')
         };
 
@@ -609,14 +631,19 @@
             let accuracy = attempts === 0 ? 100 : Math.round((hits / attempts) * 100);
             document.getElementById('hud-score').innerText = `${accuracy}%`;
             document.getElementById('final-score').innerText = `${accuracy}%`;
+            document.getElementById('hud-lives').innerText = '❤️'.repeat(Math.max(0, lives));
         }
 
         function startGame() {
             sessionGameData = [...masterGameData].sort(() => Math.random() - 0.5).slice(0, 6);
-            
+            restartMission();
+        }
+
+        function restartMission() {
             currentPhase = 0;
             attempts = 0;
             hits = 0;
+            lives = 3;
             updateHUD();
             
             switchScreen('map');
@@ -628,7 +655,6 @@
 
         function initMap() {
             if (!map) {
-                // CENTRALIZAÇÃO MAIS ABERTA PARA PEGAR EUROPA + CAÚCASO
                 map = L.map('map-container').setView([48.0, 20.0], 3);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -645,20 +671,27 @@
             document.getElementById('map-prompt').innerHTML = `Missão: Encontre a base do movimento em <strong>${activeRegion.region}</strong>.`;
             document.getElementById('map-feedback').innerText = "";
             
-            markerGroup.clearLayers(); 
+            // Esconde o botão de avançar no início de cada nova busca
+            document.getElementById('btn-advance-map').style.display = 'none';
             
-            // GARANTE QUE O MAPA VOLTE PARA A VISÃO GERAL PANORÂMICA NO INÍCIO DE CADA MISSÃO
+            markerGroup.clearLayers(); 
             map.flyTo([48.0, 20.0], 3, { duration: 1.5 });
 
-            for(let i=0; i<4; i++) {
-                let randomLat = Math.random() * (60 - 38) + 38; 
-                let randomLng = Math.random() * (25 - (-9)) + (-9); 
-                createRadarPin(randomLat, randomLng, false);
-            }
-            createRadarPin(activeRegion.lat, activeRegion.lng, true);
+            // Sorteia Distratores Reais
+            let distractors = masterGameData
+                .filter(item => item.id !== activeRegion.id)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 4);
+
+            distractors.forEach(d => {
+                createRadarPin(d.lat, d.lng, false, d.region);
+            });
+            
+            // Cria o Pino Correto
+            createRadarPin(activeRegion.lat, activeRegion.lng, true, activeRegion.region);
         }
 
-        function createRadarPin(lat, lng, isTarget) {
+        function createRadarPin(lat, lng, isTarget, regionName) {
             const customIcon = L.divIcon({
                 className: 'custom-radar-wrapper',
                 html: '<div class="radar-pin"></div>',
@@ -666,33 +699,37 @@
             });
 
             const marker = L.marker([lat, lng], { icon: customIcon }).addTo(markerGroup);
-            marker.on('click', function(e) { handlePinClick(isTarget, e.target); });
+            marker.on('click', function(e) { handlePinClick(isTarget, e.target, regionName); });
         }
 
-        function handlePinClick(isTarget, markerInstance) {
+        function handlePinClick(isTarget, markerInstance, regionName) {
             attempts++;
             const feedback = document.getElementById('map-feedback');
-            // Esconde o botão de avanço manual
-            document.getElementById('btn-advance-map').style.display = 'none';
             const pinElement = markerInstance.getElement().querySelector('.radar-pin');
             
             if(isTarget) {
                 hits++;
                 pinElement.classList.add('correct');
-                feedback.innerText = "Alvo Confirmado! Esboce o mapa em seu caderno.";
+                feedback.innerText = "Alvo Confirmado! Esboce a localização no seu mapa do caderno.";
                 feedback.style.color = 'var(--success)';
                 updateHUD();
                 
                 markerGroup.eachLayer(layer => layer.off('click'));
                 map.flyTo(markerInstance.getLatLng(), 6, { duration: 1 });
                 
-                // MUDANÇA AQUI: Mostra o botão em vez de pular a tela sozinho
+                // Exibe o botão para o aluno avançar só quando ele terminar de desenhar
                 document.getElementById('btn-advance-map').style.display = 'block';
             } else {
+                lives--;
                 pinElement.classList.add('wrong');
-                feedback.innerText = "Coordenada Errada. Tente outro sinal de radar.";
+                feedback.innerText = `Alvo Incorreto! Aqui é a base de: ${regionName}.`;
                 feedback.style.color = 'var(--danger)';
                 updateHUD();
+
+                if(lives <= 0) {
+                    markerGroup.eachLayer(layer => layer.off('click'));
+                    setTimeout(() => switchScreen('gameover'), 1200);
+                }
             }
         }
 
