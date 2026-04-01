@@ -93,6 +93,11 @@
             z-index: 1;
         }
 
+        /* FILTRO PARA DEIXAR O MAPA MENOS ESCURO */
+        .leaflet-tile {
+            filter: brightness(1.5) contrast(0.95);
+        }
+
         .leaflet-div-icon { background: transparent; border: none; }
 
         .radar-pin {
@@ -239,10 +244,10 @@
                 culture: 'Cultura bávara forte, dialeto próprio e tradições locais.',
                 history: 'Movimento eleitoral minoritário. O objetivo é a independência, motivada pela ideia de que a rica Baviera sustenta o resto da Alemanha.',
                 task: 'Anote no caderno: Qual é o principal argumento do movimento separatista na Baviera?',
-                quiz: { q: 'O argumento central que embasa o separatismo na Baviera é de natureza:', options: [
-                    { text: 'Étnica, baseada em conflitos religiosos históricos.', isCorrect: false },
-                    { text: 'Econômica, ligada à redistribuição de riquezas.', isCorrect: true },
-                    { text: 'Linguística, devido à proibição do dialeto local.', isCorrect: false }
+                quiz: { q: 'A situação atual do separatismo na Baviera é caracterizada por:', options: [
+                    { text: 'Conflito armado.', isCorrect: false },
+                    { text: 'Movimento político pacífico e minoritário.', isCorrect: true },
+                    { text: 'Controle total da região.', isCorrect: false }
                 ]}
             },
             {
@@ -250,10 +255,10 @@
                 culture: 'Etnia e cultura armênia.',
                 history: 'Enclave armênio que operou como um estado de facto (República de Artsakh) até ser retomado militarmente pelo Azerbaijão em 2023.',
                 task: 'Anote no caderno: Qual foi o desfecho do conflito em Nagorno-Karabakh no ano de 2023?',
-                quiz: { q: 'Após as ofensivas de 2023, a liderança separatista de Artsakh passou a operar:', options: [
-                    { text: 'Em enclaves militarizados na região sul.', isCorrect: false },
-                    { text: 'A partir da diáspora e do exílio político.', isCorrect: true },
-                    { text: 'Como um partido legal no parlamento azeri.', isCorrect: false }
+                quiz: { q: 'Onde atua atualmente o movimento separatista de Nagorno-Karabakh?', options: [
+                    { text: 'No governo central.', isCorrect: false },
+                    { text: 'No exílio e na diáspora armênia.', isCorrect: true },
+                    { text: 'Em bases militares locais.', isCorrect: false }
                 ]}
             },
             {
@@ -261,10 +266,10 @@
                 culture: 'Língua holandesa (flamengo).',
                 history: 'Região norte, mais rica da Bélgica. O nacionalismo busca independência ou união com os Países Baixos por discordâncias com o sul.',
                 task: 'Anote no caderno: Por que a região de Flandres busca a separação da Bélgica?',
-                quiz: { q: 'O projeto geopolítico alternativo à independência total de Flandres seria:', options: [
-                    { text: 'A fusão com a região da Valônia.', isCorrect: false },
-                    { text: 'A integração total aos Países Baixos.', isCorrect: true },
-                    { text: 'A anexação militar ao território alemão.', isCorrect: false }
+                quiz: { q: 'Além da independência, qual outra alternativa é considerada pelo nacionalismo flamengo?', options: [
+                    { text: 'União com a Alemanha.', isCorrect: false },
+                    { text: 'União com os Países Baixos.', isCorrect: true },
+                    { text: 'Retorno à França.', isCorrect: false }
                 ]}
             },
             {
@@ -272,10 +277,10 @@
                 culture: 'Língua francesa.',
                 history: 'Movimento minoritário (Rattachismo) que, em caso de fragmentação do país, prefere a anexação à França.',
                 task: 'Anote no caderno: O que significa o movimento Rattachista na Valônia?',
-                quiz: { q: 'O rattachismo na Valônia é um movimento político que defende estritamente:', options: [
-                    { text: 'A anexação do território à França.', isCorrect: true },
-                    { text: 'A criação de um Estado trilíngue neutro.', isCorrect: false },
-                    { text: 'A soberania plena e isolacionismo econômico.', isCorrect: false }
+                quiz: { q: 'Qual é o objetivo final do Rattachismo na Valônia?', options: [
+                    { text: 'A união com a França.', isCorrect: true },
+                    { text: 'Independência total.', isCorrect: false },
+                    { text: 'União com a Alemanha.', isCorrect: false }
                 ]}
             },
             {
@@ -283,10 +288,10 @@
                 culture: 'Etnia sérvia, cristãos ortodoxos.',
                 history: 'Entidade da Bósnia, criada após a guerra. Gera forte tensão com ameaças frequentes de secessão para se unir à Sérvia.',
                 task: 'Anote no caderno: Qual país a Republika Srpska deseja se unir?',
-                quiz: { q: 'A ameaça de secessão da Republika Srpska visa, em última instância:', options: [
-                    { text: 'A criação de um califado autônomo nos Bálcãs.', isCorrect: false },
-                    { text: 'A unificação territorial formal com a Sérvia.', isCorrect: true },
-                    { text: 'A adesão acelerada e imediata à União Europeia.', isCorrect: false }
+                quiz: { q: 'A Republika Srpska ameaça a estabilidade de qual região?', options: [
+                    { text: 'Península Ibérica.', isCorrect: false },
+                    { text: 'Escandinávia.', isCorrect: false },
+                    { text: 'Os Bálcãs.', isCorrect: true }
                 ]}
             },
             {
@@ -294,10 +299,10 @@
                 culture: 'Etnia turca.',
                 history: 'Ocupada pela Turquia em 1974. Declarou independência como estado de facto, reconhecido apenas pela Turquia.',
                 task: 'Anote no caderno: Qual é o único país que reconhece o Chipre do Norte?',
-                quiz: { q: 'A soberania do Chipre do Norte no atual cenário diplomático internacional é:', options: [
-                    { text: 'Chancelada pelas resoluções do Conselho de Segurança.', isCorrect: false },
-                    { text: 'Reconhecida de forma exclusiva pelo governo de Ancara.', isCorrect: true },
-                    { text: 'Apoiada pelo governo central grego após o tratado de paz.', isCorrect: false }
+                quiz: { q: 'O status do Chipre do Norte é:', options: [
+                    { text: 'Estado-Membro da ONU.', isCorrect: false },
+                    { text: 'Um estado de facto reconhecido só pela Turquia.', isCorrect: true },
+                    { text: 'Província da Grécia.', isCorrect: false }
                 ]}
             },
             {
@@ -305,10 +310,10 @@
                 culture: 'Idioma feroês.',
                 history: 'Arquipélago com ampla autonomia. Há um forte debate político interno defendendo a soberania total.',
                 task: 'Anote no caderno: Qual o nível atual de controle da Dinamarca sobre as Ilhas Faroe?',
-                quiz: { q: 'Apesar de sua ampla autonomia administrativa, o debate político feroês atual foca na:', options: [
-                    { text: 'Busca pela soberania estatal e independência plena.', isCorrect: true },
-                    { text: 'Devolução territorial do arquipélago para a Noruega.', isCorrect: false },
-                    { text: 'Integração formal ao bloco econômico do Reino Unido.', isCorrect: false }
+                quiz: { q: 'As Ilhas Faroe buscam:', options: [
+                    { text: 'Independência total.', isCorrect: true },
+                    { text: 'Anexação pela Islândia.', isCorrect: false },
+                    { text: 'União Europeia.', isCorrect: false }
                 ]}
             },
             {
@@ -316,10 +321,10 @@
                 culture: 'Língua catalã.',
                 history: 'Movimento consolidado. O referendo de 2017 causou forte crise na Espanha, com prisões de líderes.',
                 task: 'Anote no caderno: O que ocorreu em 2017 na Catalunha?',
-                quiz: { q: 'A principal via de atuação do movimento separatista catalão no cenário moderno é:', options: [
-                    { text: 'A articulação por meio da política institucional.', isCorrect: true },
-                    { text: 'A insurgência armada em regiões de fronteira.', isCorrect: false },
-                    { text: 'O boicote militar e econômico ao governo de Madri.', isCorrect: false }
+                quiz: { q: 'O movimento catalão atualmente é:', options: [
+                    { text: 'Pacífico focado na secessão institucional.', isCorrect: true },
+                    { text: 'Armado.', isCorrect: false },
+                    { text: 'Sem representação.', isCorrect: false }
                 ]}
             },
             {
@@ -327,10 +332,10 @@
                 culture: 'Língua Euskara.',
                 history: 'Historicamente atuou com o grupo terrorista ETA. Hoje o grupo não existe e a via é política institucional.',
                 task: 'Anote no caderno: Como o separatismo basco atua hoje?',
-                quiz: { q: 'Com a dissolução definitiva do ETA, o nacionalismo basco passou a priorizar:', options: [
-                    { text: 'A aliança diplomática e militar exclusiva com a França.', isCorrect: false },
-                    { text: 'O avanço de suas demandas através das vias democráticas.', isCorrect: true },
-                    { text: 'A reestruturação de guerrilhas urbanas descentralizadas.', isCorrect: false }
+                quiz: { q: 'O antigo grupo ETA utilizava qual método?', options: [
+                    { text: 'Petições.', isCorrect: false },
+                    { text: 'Luta armada e atentados.', isCorrect: true },
+                    { text: 'Embargos.', isCorrect: false }
                 ]}
             },
             {
@@ -338,10 +343,10 @@
                 culture: 'Língua galega, herança celta.',
                 history: 'Focado na preservação da herança cultural. Busca autonomia ou independência.',
                 task: 'Anote no caderno: Qual herança histórica motiva a Galiza?',
-                quiz: { q: 'O principal vetor de sustentação do sentimento nacionalista galego baseia-se na:', options: [
-                    { text: 'Preservação da sua identidade e herança cultural celta.', isCorrect: true },
-                    { text: 'Reivindicação exploratória de vastas reservas de petróleo.', isCorrect: false },
-                    { text: 'Disputa de caráter dogmático e religioso com Madri.', isCorrect: false }
+                quiz: { q: 'O nacionalismo galego é motivado por:', options: [
+                    { text: 'Herança cultural celta.', isCorrect: true },
+                    { text: 'Petróleo.', isCorrect: false },
+                    { text: 'Conflitos religiosos.', isCorrect: false }
                 ]}
             },
             {
@@ -349,10 +354,10 @@
                 culture: 'Culturas regionais diversas.',
                 history: 'Movimentos nacionalistas de menor escala, focados em autonomia política.',
                 task: 'Anote no caderno: Como a força desses movimentos se compara à Catalunha?',
-                quiz: { q: 'Comparados aos catalães, os movimentos nacionalistas presentes nestas regiões são:', options: [
-                    { text: 'Marcados por radicalismo armado frequente e intenso.', isCorrect: false },
-                    { text: 'Focados na ampliação pacífica de sua autonomia local.', isCorrect: true },
-                    { text: 'Totalmente hegemônicos no controle de seus parlamentos.', isCorrect: false }
+                quiz: { q: 'Esses movimentos são considerados:', options: [
+                    { text: 'Ameaça extrema.', isCorrect: false },
+                    { text: 'De menor escala e impacto imediato.', isCorrect: true },
+                    { text: 'Grupos armados.', isCorrect: false }
                 ]}
             },
             {
@@ -360,10 +365,10 @@
                 culture: 'Idioma corso.',
                 history: 'Após décadas de atuação clandestina, hoje o foco é exigir ampla autonomia fiscal e linguística de Paris.',
                 task: 'Anote no caderno: Qual é a atual via de atuação da Córsega?',
-                quiz: { q: 'Atualmente, a principal pauta de reivindicação dos nacionalistas corsos junto a Paris é:', options: [
-                    { text: 'A concessão de autonomia fiscal e linguística local.', isCorrect: true },
-                    { text: 'O reconhecimento imediato como estado independente.', isCorrect: false },
-                    { text: 'A transferência da capital administrativa para Ajaccio.', isCorrect: false }
+                quiz: { q: 'Uma demanda central da Córsega é:', options: [
+                    { text: 'Ampla autonomia fiscal.', isCorrect: true },
+                    { text: 'União com a Itália.', isCorrect: false },
+                    { text: 'Tornar-se capital.', isCorrect: false }
                 ]}
             },
             {
@@ -371,10 +376,10 @@
                 culture: 'Língua bretã, herança celta.',
                 history: 'Movimento em oposição à centralização de Paris, defendendo autogoverno regional.',
                 task: 'Anote no caderno: Qual herança cultural motiva os bretões?',
-                quiz: { q: 'O movimento bretão estrutura-se politicamente como uma força de reação à:', options: [
-                    { text: 'Política de centralização administrativa do governo francês.', isCorrect: true },
-                    { text: 'Abertura para políticas de livre comércio da União Europeia.', isCorrect: false },
-                    { text: 'Imigração massiva e descontrolada de países vizinhos.', isCorrect: false }
+                quiz: { q: 'O movimento opõe-se principalmente:', options: [
+                    { text: 'À política centralizadora de Paris.', isCorrect: true },
+                    { text: 'À união com a Alemanha.', isCorrect: false },
+                    { text: 'Ao livre comércio.', isCorrect: false }
                 ]}
             },
             {
@@ -382,10 +387,10 @@
                 culture: 'Línguas regionais.',
                 history: 'Foco na proteção linguística. O separatismo radical é minoritário.',
                 task: 'Anote no caderno: Qual o foco na Occitânia e Alsácia?',
-                quiz: { q: 'O separatismo radical visando a ruptura total nestas regiões francesas pode ser classificado como:', options: [
-                    { text: 'Marginal em relação às demandas culturais e de autonomia.', isCorrect: true },
-                    { text: 'A força política absolutamente dominante em seus legislativos.', isCorrect: false },
-                    { text: 'Uma ameaça militar estruturada e iminente ao Estado francês.', isCorrect: false }
+                quiz: { q: 'O status do separatismo nessas regiões é:', options: [
+                    { text: 'Maioritário.', isCorrect: false },
+                    { text: 'Minoritário, focado em autonomia.', isCorrect: true },
+                    { text: 'Estado de facto.', isCorrect: false }
                 ]}
             },
             {
@@ -393,10 +398,10 @@
                 culture: 'Etnia abecásia.',
                 history: 'Estado de facto, apoiado internacionalmente quase que só pela Rússia.',
                 task: 'Anote no caderno: Qual potência sustenta a Abecásia?',
-                quiz: { q: 'A manutenção do atual status quo de facto da Abecásia depende de maneira estratégica do:', options: [
-                    { text: 'Apoio logístico, militar e econômico vindo de Moscou.', isCorrect: true },
-                    { text: 'Reconhecimento diplomático oficial da União Europeia.', isCorrect: false },
-                    { text: 'Acordo de cooperação fronteiriça assinado com a Turquia.', isCorrect: false }
+                quiz: { q: 'A Geórgia considera a Abecásia como:', options: [
+                    { text: 'Soberana.', isCorrect: false },
+                    { text: 'Província da Turquia.', isCorrect: false },
+                    { text: 'Território ocupado pela Rússia.', isCorrect: true }
                 ]}
             },
             {
@@ -404,10 +409,10 @@
                 culture: 'Etnia osseta.',
                 history: 'Estado de facto cuja liderança defende a independência para união futura com a Rússia.',
                 task: 'Anote no caderno: Qual o objetivo da Ossétia do Sul?',
-                quiz: { q: 'O projeto geopolítico declarado e de longo prazo das lideranças locais ossetas consiste na:', options: [
-                    { text: 'Integração completa do território à Federação Russa.', isCorrect: true },
-                    { text: 'Formação de uma ampla e nova confederação do Cáucaso.', isCorrect: false },
-                    { text: 'Devolução amigável da soberania para as autoridades georgianas.', isCorrect: false }
+                quiz: { q: 'Qual evento ocorreu recentemente lá?', options: [
+                    { text: 'Guerra Russo-Georgiana de 2008.', isCorrect: true },
+                    { text: 'Segunda Guerra.', isCorrect: false },
+                    { text: 'Divisão pacífica.', isCorrect: false }
                 ]}
             },
             {
@@ -415,10 +420,10 @@
                 culture: 'Maioria germanófona.',
                 history: 'Região com alta autonomia, com movimentos que defendem retorno à Áustria.',
                 task: 'Anote no caderno: Por que não falam majoritariamente italiano?',
-                quiz: { q: 'O movimento de secessão presente no Tirol do Sul tem como principal alternativa à Itália:', options: [
-                    { text: 'A reintegração da província ao território da Áustria.', isCorrect: true },
-                    { text: 'A fundação de um novo cantão independente na Suíça.', isCorrect: false },
-                    { text: 'A criação de um estado germânico totalmente soberano.', isCorrect: false }
+                quiz: { q: 'A secessão tem como alternativa:', options: [
+                    { text: 'Integração à Áustria.', isCorrect: true },
+                    { text: 'Estado suíço.', isCorrect: false },
+                    { text: 'Unificação francesa.', isCorrect: false }
                 ]}
             },
             {
@@ -426,10 +431,10 @@
                 culture: 'Identidade insular.',
                 history: 'Movimentos nacionalistas com apelo de autogoverno baseados em raízes profundas.',
                 task: 'Anote no caderno: Qual o caráter principal nas grandes ilhas?',
-                quiz: { q: 'Os discursos e movimentos de autogoverno nestas regiões italianas apoiam-se majoritariamente na sua:', options: [
-                    { text: 'Diferença de natureza confessional em relação ao continente.', isCorrect: false },
-                    { text: 'Condição geográfica insular e em suas raízes históricas.', isCorrect: true },
-                    { text: 'Base produtiva e industrial consideravelmente superior à de Roma.', isCorrect: false }
+                quiz: { q: 'Os movimentos fundamentam-se em:', options: [
+                    { text: 'Religião.', isCorrect: false },
+                    { text: 'Raízes históricas distintas do continente.', isCorrect: true },
+                    { text: 'Pressão militar.', isCorrect: false }
                 ]}
             },
             {
@@ -437,10 +442,10 @@
                 culture: 'Identidade do norte.',
                 history: 'Antiga "Padânia". Focam em autonomia fiscal para não dividir riqueza com o sul.',
                 task: 'Anote no caderno: Qual o antigo nome do projeto do norte?',
-                quiz: { q: 'A principal engrenagem de motivação do nacionalismo no norte da Itália é de ordem:', options: [
-                    { text: 'Tributária.', isCorrect: true },
-                    { text: 'Linguística.', isCorrect: false },
-                    { text: 'Religiosa.', isCorrect: false }
+                quiz: { q: 'A motivação do Vêneto é:', options: [
+                    { text: 'Econômica (impostos).', isCorrect: true },
+                    { text: 'Religiosa.', isCorrect: false },
+                    { text: 'Étnica.', isCorrect: false }
                 ]}
             },
             {
@@ -448,10 +453,10 @@
                 culture: 'Herança soviética, falam russo.',
                 history: 'Estado fantasma pró-Rússia, independente de facto desde 1992 sem reconhecimento oficial.',
                 task: 'Anote no caderno: O que é a Transnístria?',
-                quiz: { q: 'A sustentação da Transnístria como um estado não reconhecido está diretamente atrelada à:', options: [
-                    { text: 'Manutenção de tropas e arsenais russos no local.', isCorrect: true },
-                    { text: 'Forte aliança comercial estabelecida com a Romênia.', isCorrect: false },
-                    { text: 'Chancela temporária da Organização das Nações Unidas.', isCorrect: false }
+                quiz: { q: 'A Transnístria depende de qual país?', options: [
+                    { text: 'Romênia.', isCorrect: false },
+                    { text: 'Rússia.', isCorrect: true },
+                    { text: 'Turquia.', isCorrect: false }
                 ]}
             },
             {
@@ -459,10 +464,10 @@
                 culture: 'Turcomanos ortodoxos.',
                 history: 'Região autônoma com forte sentimento pró-Rússia.',
                 task: 'Anote no caderno: O que engatilharia o separatismo?',
-                quiz: { q: 'No complexo xadrez regional, o principal fator de alinhamento geopolítico da Gagaúzia é:', options: [
-                    { text: 'A influência russa.', isCorrect: true },
-                    { text: 'O pan-turquismo.', isCorrect: false },
-                    { text: 'O projeto europeu.', isCorrect: false }
+                quiz: { q: 'A Gagaúzia é alinhada à:', options: [
+                    { text: 'União Europeia.', isCorrect: false },
+                    { text: 'Rússia.', isCorrect: true },
+                    { text: 'EUA.', isCorrect: false }
                 ]}
             },
             {
@@ -470,10 +475,10 @@
                 culture: 'Herança celta.',
                 history: 'Perdeu referendo em 2014, mas a saída do Reino Unido da UE (Brexit) reacendeu a luta.',
                 task: 'Anote no caderno: Qual partido lidera a Escócia?',
-                quiz: { q: 'O grande argumento utilizado nos últimos anos para justificar a convocação de um novo referendo escocês foi:', options: [
-                    { text: 'A saída do governo britânico da União Europeia (Brexit).', isCorrect: true },
-                    { text: 'A descoberta recente de vastas e lucrativas jazidas de gás.', isCorrect: false },
-                    { text: 'O colapso institucional e financeiro do sistema monárquico.', isCorrect: false }
+                quiz: { q: 'Por que a Escócia quer novo referendo?', options: [
+                    { text: 'Efeitos do Brexit.', isCorrect: true },
+                    { text: 'Guerra.', isCorrect: false },
+                    { text: 'Ouro.', isCorrect: false }
                 ]}
             },
             {
@@ -481,10 +486,10 @@
                 culture: 'Irlandeses x Britânicos.',
                 history: 'Os republicanos buscam secessão para reunificação com a Irlanda.',
                 task: 'Anote no caderno: O que os republicanos buscam?',
-                quiz: { q: 'O projeto histórico máximo dos grupos nacionalistas e republicanos nesta região é alcançar:', options: [
-                    { text: 'A unificação de toda a ilha sob a República da Irlanda.', isCorrect: true },
-                    { text: 'A independência absoluta como um novo Estado soberano.', isCorrect: false },
-                    { text: 'A devolução do controle administrativo para a Escócia.', isCorrect: false }
+                quiz: { q: 'Qual o objetivo dos nacionalistas?', options: [
+                    { text: 'Capital britânica.', isCorrect: false },
+                    { text: 'Reunificação com a Irlanda.', isCorrect: true },
+                    { text: 'Abolir monarquia.', isCorrect: false }
                 ]}
             },
             {
@@ -492,10 +497,10 @@
                 culture: 'Língua galesa.',
                 history: 'O nacionalismo galês (Plaid Cymru) cresceu politicamente nos últimos anos.',
                 task: 'Anote no caderno: Nome do partido nacionalista.',
-                quiz: { q: 'O panorama do movimento de independência galês na atualidade apresenta um cenário de:', options: [
-                    { text: 'Crescimento estruturado na via política e eleitoral.', isCorrect: true },
-                    { text: 'Estagnação devido a severos conflitos civis armados.', isCorrect: false },
-                    { text: 'Amplo e absoluto domínio do parlamento em Londres.', isCorrect: false }
+                quiz: { q: 'O movimento de independência galesa é:', options: [
+                    { text: 'Armado.', isCorrect: false },
+                    { text: 'Um movimento político em crescimento.', isCorrect: true },
+                    { text: 'Consolidado.', isCorrect: false }
                 ]}
             },
             {
@@ -503,10 +508,10 @@
                 culture: 'Herança britônica.',
                 history: 'Movimento minoritário para proteger identidade e autonomia.',
                 task: 'Anote no caderno: Cornualha é massa ou minoria?',
-                quiz: { q: 'A atuação do movimento regionalista na Cornualha concentra-se de maneira prioritária em garantir a:', options: [
-                    { text: 'Proteção identitária celta e maior autonomia regional.', isCorrect: true },
-                    { text: 'Independência econômica mediante a adoção de nova moeda.', isCorrect: false },
-                    { text: 'Integração formal e unificação territorial ao País de Gales.', isCorrect: false }
+                quiz: { q: 'Foco na Cornualha:', options: [
+                    { text: 'Nova moeda.', isCorrect: false },
+                    { text: 'Reconhecimento celta e autonomia.', isCorrect: true },
+                    { text: 'Anexação.', isCorrect: false }
                 ]}
             },
             {
@@ -514,10 +519,10 @@
                 culture: 'Etnia chechena.',
                 history: 'Travou duas guerras contra Moscou. Hoje é controlada e o separatismo atua no exílio.',
                 task: 'Anote no caderno: Como a Rússia lidou com a Chechênia?',
-                quiz: { q: 'Sob a forte administração atual, a articulação estruturada do separatismo checheno ocorre:', options: [
-                    { text: 'Liderando abertamente a oposição na capital russa.', isCorrect: false },
-                    { text: 'Majoritariamente a partir da diáspora e do exílio.', isCorrect: true },
-                    { text: 'Através do controle autônomo e militar de zonas rurais.', isCorrect: false }
+                quiz: { q: 'Onde atua o movimento checheno hoje?', options: [
+                    { text: 'Moscou.', isCorrect: false },
+                    { text: 'Livre nas praças.', isCorrect: false },
+                    { text: 'No exílio.', isCorrect: true }
                 ]}
             },
             {
@@ -525,10 +530,10 @@
                 culture: 'Povos Adyge.',
                 history: 'Foco no resgate de terras e reconhecimento do genocídio do séc. XIX.',
                 task: 'Anote no caderno: O que os circassianos buscam?',
-                quiz: { q: 'O principal elemento de coesão do movimento nacionalista circassiano moderno é baseado no:', options: [
-                    { text: 'Reconhecimento internacional do genocídio do séc. XIX.', isCorrect: true },
-                    { text: 'Acirramento das disputas pelas rotas mercantis do Mar Negro.', isCorrect: false },
-                    { text: 'Estabelecimento imediato de um Estado estritamente laico.', isCorrect: false }
+                quiz: { q: 'As raízes circassianas:', options: [
+                    { text: 'Petróleo.', isCorrect: false },
+                    { text: 'Traumas do genocídio do séc. XIX.', isCorrect: true },
+                    { text: 'Conflitos com a UE.', isCorrect: false }
                 ]}
             },
             {
@@ -536,10 +541,10 @@
                 culture: 'Etnias diversas, islâmicos.',
                 history: 'Manifestou-se via insurgência islâmica clandestina de baixa intensidade.',
                 task: 'Anote no caderno: Como se manifestou recentemente?',
-                quiz: { q: 'Nas últimas décadas, a manifestação radical do separatismo nestas repúblicas assumiu o formato de:', options: [
-                    { text: 'Insurgência armada e pulverizada.', isCorrect: true },
-                    { text: 'Protestos urbanos estritamente pacíficos.', isCorrect: false },
-                    { text: 'Plebiscitos constitucionais reconhecidos.', isCorrect: false }
+                quiz: { q: 'Marcado por:', options: [
+                    { text: 'Insurgência armada descentralizada.', isCorrect: true },
+                    { text: 'Petições pacíficas.', isCorrect: false },
+                    { text: 'Idoma russo.', isCorrect: false }
                 ]}
             },
             {
@@ -547,10 +552,10 @@
                 culture: 'Etnia albanesa.',
                 history: 'Declarou independência em 2008. Estado de facto, com reconhecimento internacional parcial.',
                 task: 'Anote no caderno: Nível de reconhecimento diplomático?',
-                quiz: { q: 'Na óptica do Direito Internacional contemporâneo, a posição diplomática do Kosovo é definida como:', options: [
-                    { text: 'Um membro pleno e irrestrito da Assembleia Geral da ONU.', isCorrect: false },
-                    { text: 'Um Estado independente que possui reconhecimento parcial.', isCorrect: true },
-                    { text: 'Uma província ultramarina sob a jurisdição da Albânia.', isCorrect: false }
+                quiz: { q: 'A soberania do Kosovo é:', options: [
+                    { text: 'Universal.', isCorrect: false },
+                    { text: 'Inexistente.', isCorrect: false },
+                    { text: 'Contestada, com reconhecimento parcial.', isCorrect: true }
                 ]}
             },
             {
@@ -558,10 +563,10 @@
                 culture: 'Falantes de russo.',
                 history: 'Epicentro do conflito e separatismo pró-Rússia (2014). Anexadas militarmente por Moscou.',
                 task: 'Anote no caderno: Quem patrocinou o conflito?',
-                quiz: { q: 'Após a eclosão do conflito em 2014 e os eventos subsequentes, as repúblicas de Donetsk e Luhansk foram:', options: [
-                    { text: 'Reconhecidas internacionalmente como áreas desmilitarizadas.', isCorrect: false },
-                    { text: 'Ocupadas, controladas e militarmente anexadas por Moscou.', isCorrect: true },
-                    { text: 'Reintegradas de forma diplomática ao governo central de Kiev.', isCorrect: false }
+                quiz: { q: 'A atual situação é:', options: [
+                    { text: 'Pacíficas.', isCorrect: false },
+                    { text: 'Ocupadas e anexadas pela Rússia.', isCorrect: true },
+                    { text: 'Soberanas.', isCorrect: false }
                 ]}
             },
             {
@@ -569,10 +574,10 @@
                 culture: 'Maioria russa.',
                 history: 'Anexação ilegal pela Rússia em 2014 após referendo fraudulento.',
                 task: 'Anote no caderno: Em que ano ocorreu?',
-                quiz: { q: 'A controversa manobra de anexação da Península da Crimeia em 2014 foi justificada pela Rússia com base em:', options: [
-                    { text: 'Um referendo não reconhecido pelas entidades internacionais.', isCorrect: true },
-                    { text: 'Uma resolução extraordinária do Conselho de Segurança da ONU.', isCorrect: false },
-                    { text: 'Um tratado comercial de concessão territorial assinado com Kiev.', isCorrect: false }
+                quiz: { q: 'Do ponto de vista da ONU, a Crimeia é:', options: [
+                    { text: 'Território ocupado da Ucrânia.', isCorrect: true },
+                    { text: 'Independente.', isCorrect: false },
+                    { text: 'Propriedade da Turquia.', isCorrect: false }
                 ]}
             }
         ];
@@ -606,7 +611,6 @@
         }
 
         function startGame() {
-            // Sorteia 6 regiões para a partida
             sessionGameData = [...masterGameData].sort(() => Math.random() - 0.5).slice(0, 6);
             
             currentPhase = 0;
@@ -623,10 +627,11 @@
 
         function initMap() {
             if (!map) {
-                map = L.map('map-container').setView([50.0, 10.0], 4);
+                // CENTRALIZAÇÃO MAIS ABERTA PARA PEGAR EUROPA + CAÚCASO
+                map = L.map('map-container').setView([48.0, 20.0], 3);
                 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                     attribution: '&copy; OpenStreetMap &copy; CARTO',
-                    subdomains: 'abcd', maxZoom: 10, minZoom: 3
+                    subdomains: 'abcd', maxZoom: 10, minZoom: 2
                 }).addTo(map);
                 markerGroup = L.layerGroup().addTo(map);
             } else {
@@ -641,11 +646,8 @@
             
             markerGroup.clearLayers(); 
             
-            // 1. Joga a câmera "para o alto" (visão global) instantaneamente
-            map.setView([20.0, 0.0], 2); 
-            
-            // 2. Faz o voo suave de volta para um centro genérico da Europa (sem dar zoom no alvo correto)
-            map.flyTo([49.0, 10.0], 4, { duration: 1.5 });
+            // GARANTE QUE O MAPA VOLTE PARA A VISÃO GERAL PANORÂMICA NO INÍCIO DE CADA MISSÃO
+            map.flyTo([48.0, 20.0], 3, { duration: 1.5 });
 
             for(let i=0; i<4; i++) {
                 let randomLat = Math.random() * (60 - 38) + 38; 
@@ -679,7 +681,10 @@
                 updateHUD();
                 
                 markerGroup.eachLayer(layer => layer.off('click'));
+                
+                // ZOOM DE CONFIRMAÇÃO APÓS ACERTO
                 map.flyTo(markerInstance.getLatLng(), 6, { duration: 1 });
+                
                 setTimeout(() => loadDossierPhase(), 1500);
             } else {
                 pinElement.classList.add('wrong');
