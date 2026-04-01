@@ -191,6 +191,7 @@
             
             <div id="map-container"></div>
             <p id="map-feedback" style="margin-top: 15px; text-align: center; font-weight: bold; height: 24px;"></p>
+            <button id="btn-advance-map" class="btn" style="display: none; margin: 0 auto;" onclick="loadDossierPhase()">Já anotei! Avançar para Dossiê</button>
         </div>
 
         <div id="screen-dossier" class="screen">
@@ -671,21 +672,22 @@
         function handlePinClick(isTarget, markerInstance) {
             attempts++;
             const feedback = document.getElementById('map-feedback');
+            // Esconde o botão de avanço manual
+            document.getElementById('btn-advance-map').style.display = 'none';
             const pinElement = markerInstance.getElement().querySelector('.radar-pin');
             
             if(isTarget) {
                 hits++;
                 pinElement.classList.add('correct');
-                feedback.innerText = "Alvo Confirmado! Baixando Dossiê...";
+                feedback.innerText = "Alvo Confirmado! Esboce o mapa em seu caderno.";
                 feedback.style.color = 'var(--success)';
                 updateHUD();
                 
                 markerGroup.eachLayer(layer => layer.off('click'));
-                
-                // ZOOM DE CONFIRMAÇÃO APÓS ACERTO
                 map.flyTo(markerInstance.getLatLng(), 6, { duration: 1 });
                 
-                setTimeout(() => loadDossierPhase(), 1500);
+                // MUDANÇA AQUI: Mostra o botão em vez de pular a tela sozinho
+                document.getElementById('btn-advance-map').style.display = 'block';
             } else {
                 pinElement.classList.add('wrong');
                 feedback.innerText = "Coordenada Errada. Tente outro sinal de radar.";
